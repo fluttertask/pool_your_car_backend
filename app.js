@@ -29,7 +29,9 @@ app.use("/", myroute);
 app.use("/", require("./routes/index"));
 app.use(express.static('public'))
 
-server = app.listen(3000);
+var PORT = process.env.PORT || 3000
+
+server = app.listen(PORT);
 const io = require("socket.io")(server);
 io.on('connection', function (client) {
 
