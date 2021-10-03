@@ -1,10 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const bodyParser = require("body-parser");
 const app = express();
 const multer = require("multer");
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
