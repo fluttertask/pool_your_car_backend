@@ -610,7 +610,7 @@ router.put("/api/ride/bookride/:id", (req, res) => {
   Ride.findByIdAndUpdate(
     req.params.id, 
     {
-      $put: {passengersID: req.body.userId},
+      $push: {passengersID: req.body.userId},
       $inc: { availableseats: 1}
     },
     {new: true},
