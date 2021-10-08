@@ -504,11 +504,11 @@ router.get("/api/ride/getallofferedridesofuser/:userid", (req, res) => {
                   }
                 );
 
-                res.status(200).json({
-                  code: 200,
-                  message: "Ride added in past offered ride successfully",
-                  updateUser: doc,
-                });
+                // res.status(200).json({
+                //   code: 200,
+                //   message: "Ride added in past offered ride successfully",
+                //   updateUser: doc,
+                // });
               } else {
                 console.log(err);
               }
