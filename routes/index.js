@@ -586,11 +586,7 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
 
       if (data != null) {
         User.find(
-          {
-            _id: {
-              $in: data.passengersID,
-            }
-          },
+          {_id: { $in: data.passengersID } },
           (err, result)=>{
             res.json({
               code: 200,
@@ -626,7 +622,7 @@ router.put("/api/ride/bookride/:id", (req, res) => {
 
         User.findOneAndUpdate(
           { _id: req.body.userId },
-          { $put: { bookedride: req.params.id } },
+          { $push: { bookedride: req.params.id } },
           { new: true },
           (err, doc) => {
             if (!err) {
