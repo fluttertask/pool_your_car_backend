@@ -575,6 +575,39 @@ router.delete("/api/ride/deletepastofferedride/:id", (req, res) => {
   });
 });
 
+// Get all passengers in a ride
+
+router.get("/api/ride/passengers/:id", (req, res)=>{
+  Ride.findById(
+    req.params.id,
+    (err, data) => {
+    if (!err) {
+      console.log(data.passengersID);
+
+      if (data != null) {
+        User.find(
+          {
+            _id: {
+              $in: data.passengersID,
+            }
+          },
+          (err, result)=>{
+            res.json({
+              code: 200,
+              message: "Passenger has been provided",
+              passengers: result,
+            })
+          }
+        )
+      }
+    }
+    res.json({
+      code: 401,
+      message: "Passenger could not be provided",
+    })
+  })
+});
+
 // Book ride api
 
 router.put("/api/ride/bookride/:id", (req, res) => {
@@ -606,7 +639,7 @@ router.put("/api/ride/bookride/:id", (req, res) => {
           res.json({
             code: 200,
             message: "Ride booked successfully",
-            deleteRide: data,
+            passengers: data.passengersID,
           });
       } else {
         res.json({
