@@ -44,13 +44,13 @@ const Ride = mongoose.model("Ride", {
     type: Number,
     required: true,
   },
-  // passengers: [
-  //   {
-  //     type: mongoose.Schema.ObjectId,
-  //     seatsbooked: Number,
-  //     ref: "User",
-  //   },
-  // ],
+  passengers: [
+    {
+      type: mongoose.Schema.ObjectId,
+      seatsbooked: Number,
+      ref: "User",
+    },
+  ],
 
   cartype: {
     type: String,

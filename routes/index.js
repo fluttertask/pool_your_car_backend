@@ -577,10 +577,94 @@ router.delete("/api/ride/deletepastofferedride/:id", (req, res) => {
 
 // Book ride api
 
+router.put("/api/ride/bookride/:id", (req, res) => {
+  Ride.findByIdAndUpdate(
+    req.params.id, 
+    {
+      $put: {passengersID: req.body.userId},
+      $inc: { availableseats: 1}
+    },
+    {new: true},
+    (err, data) => {
+    if (!err) {
+      console.log(data);
 
+      if (data != null) {
+
+        User.findOneAndUpdate(
+          { _id: req.body.userId },
+          { $put: { bookedride: req.params.id } },
+          { new: true },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
+          }
+        ),
+          res.json({
+            code: 200,
+            message: "Ride booked successfully",
+            deleteRide: data,
+          });
+      } else {
+        res.json({
+          code: 200,
+          message: "Ride not found",
+        });
+      }
+    } else {
+      console.log(err);
+    }
+  });
+});
 
 
 //cancel booked ride api
+
+router.delete("/api/ride/cancelbookedride/:id", (req, res) => {
+  Ride.findByIdAndUpdate(
+    req.params.id, 
+    {
+      $pull: {passengersID: req.body.userId},
+      $inc: { availableseats: -1}
+    },
+    {new: true},
+    (err, data) => {
+    if (!err) {
+      console.log(data);
+
+      if (data != null) {
+
+        User.findOneAndUpdate(
+          { _id: req.body.userId },
+          { $pull: { bookedride: req.params.id } },
+          { new: true },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
+          }
+        ),
+          res.json({
+            code: 200,
+            message: "Booked ride has been removed successfully",
+            deleteRide: data,
+          });
+      } else {
+        res.json({
+          code: 200,
+          message: "Ride not found",
+        });
+      }
+    } else {
+      console.log(err);
+    }
+  });
+});
 
 
 module.exports = router;
