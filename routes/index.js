@@ -379,7 +379,7 @@ router.post("/api/ride/add", (req, res, next) => {
               console.log(doc);
               res.status(200).json({
                 code: 200,
-                message: "Ride created for User",
+                message: "Ride created for Users",
                 updateUser: doc,
               });
             } else {
