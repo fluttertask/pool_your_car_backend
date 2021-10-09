@@ -585,6 +585,7 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
       console.log(data.passengersID);
 
       if (data != null) {
+          
         User.find(
           {_id: { $in: data.passengersID } },
           (err, result)=>{
@@ -606,12 +607,12 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
 
 // Book ride api
 
-router.put("/api/ride/bookride/:id", (req, res) => {
+router.post("/api/ride/bookride/:id", (req, res) => {
   Ride.findByIdAndUpdate(
     req.params.id, 
     {
       $push: {passengersID: req.body.userId},
-      $inc: { availableseats: 1}
+      $inc: { availableseats: +1}
     },
     {new: true},
     (err, data) => {
@@ -652,12 +653,12 @@ router.put("/api/ride/bookride/:id", (req, res) => {
 
 //cancel booked ride api
 
-router.delete("/api/ride/cancelbookedride/:id", (req, res) => {
+router.post("/api/ride/cancelbookedride/:id", (req, res) => {
   Ride.findByIdAndUpdate(
     req.params.id, 
     {
       $pull: {passengersID: req.body.userId},
-      $inc: { availableseats: -1}
+      $inc: { availableseats: 1}
     },
     {new: true},
     (err, data) => {
