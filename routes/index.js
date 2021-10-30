@@ -575,6 +575,86 @@ router.delete("/api/ride/deletepastofferedride/:id", (req, res) => {
   });
 });
 
+//Get single booked Ride of user
+
+router.get("/api/ride/getsinglebookedride/:id", (req, res) => {
+  Ride.findById(req.params.id, (err, data) => {
+    if (!err) {
+      res.send(data);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+//find all booked rides of single user
+router.get("/api/ride/getallbookedridesofuser/:userid", (req, res) => {
+  var dateNow = new Date();
+
+  // var newdate
+  var completedate;
+  var combine_date_time_string;
+
+  //var dateTime = convertToDateTime("23.11.2009 12:34:56", "dd.MM.yyyy HH:mm:ss");
+  User.findById(req.params.userid)
+    .populate("bookedride")
+    .then((ride) => {
+      //console.log(ride.offeredride[0].time);
+      //date = dateFormat(ride.offeredride[0].date, "dddd, mmmm d, yyyy");
+      ride.offeredride.forEach((_ride) => {
+        combine_date_time_string = _ride.date + " " + _ride.time;
+        completedate = new Date(combine_date_time_string);
+        //newdate = dateFormat(completedate, "dddd, mmmm d, yyyy h:MM TT");
+
+        if (completedate < dateNow) {
+          //console.log(completedate + " is less than " + dateNow);
+
+          User.findOneAndUpdate(
+            { _id: req.params.userid },
+            { $push: { pastbookedride: _ride.id } },
+            { new: true },
+            (err, doc) => {
+              if (!err) {
+                console.log(doc);
+                User.findOneAndUpdate(
+                  { _id: req.params.userid },
+                  { $pull: { bookedride: _ride.id } },
+                  { new: true },
+                  (err, doc) => {
+                    if (!err) {
+                      console.log(doc);
+                    } else {
+                      console.log(err);
+                    }
+                  }
+                );
+
+                // res.status(200).json({
+                //   code: 200,
+                //   message: "Ride added in past offered ride successfully",
+                //   updateUser: doc,
+                // });
+              } else {
+                console.log(err);
+              }
+            }
+          );
+        } else {
+          console.log(completedate + " is greater than " + dateNow);
+        }
+      });
+
+      res.json(ride);
+    });
+  // .exec((err, offeredride) => {
+  //   if (!err) {
+  //     res.send(offeredride);
+  //   } else {
+  //     console.log(err);
+  //   }
+  // });
+});
+
 // Get all passengers in a ride
 
 router.get("/api/ride/passengers/:id", (req, res)=>{
