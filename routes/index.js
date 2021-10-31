@@ -601,7 +601,7 @@ router.get("/api/ride/getallbookedridesofuser/:userid", (req, res) => {
     .then((ride) => {
       //console.log(ride.offeredride[0].time);
       //date = dateFormat(ride.offeredride[0].date, "dddd, mmmm d, yyyy");
-      ride.offeredride.forEach((_ride) => {
+      ride.bookedride.forEach((_ride) => {
         combine_date_time_string = _ride.date + " " + _ride.time;
         completedate = new Date(combine_date_time_string);
         //newdate = dateFormat(completedate, "dddd, mmmm d, yyyy h:MM TT");
@@ -628,12 +628,6 @@ router.get("/api/ride/getallbookedridesofuser/:userid", (req, res) => {
                     }
                   }
                 );
-
-                // res.status(200).json({
-                //   code: 200,
-                //   message: "Ride added in past offered ride successfully",
-                //   updateUser: doc,
-                // });
               } else {
                 console.log(err);
               }
@@ -646,13 +640,6 @@ router.get("/api/ride/getallbookedridesofuser/:userid", (req, res) => {
 
       res.json(ride);
     });
-  // .exec((err, offeredride) => {
-  //   if (!err) {
-  //     res.send(offeredride);
-  //   } else {
-  //     console.log(err);
-  //   }
-  // });
 });
 
 // Get all passengers in a ride
@@ -669,7 +656,8 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
         User.find(
           {_id: { $in: data.passengersID } },
           (err, result)=>{
-            res.json({
+            console.log(result);
+            return res.json({
               code: 200,
               message: "Passenger has been provided",
               passengers: result,
@@ -678,7 +666,7 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
         )
       }
     }
-    res.json({
+    return res.json({
       code: 401,
       message: "Passenger could not be provided",
     })
@@ -692,7 +680,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
     req.params.id, 
     {
       $push: {passengersID: req.body.userId},
-      $inc: { availableseats: +1}
+      $inc: { availableseats: -1}
     },
     {new: true},
     (err, data) => {
@@ -738,7 +726,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
     req.params.id, 
     {
       $pull: {passengersID: req.body.userId},
-      $inc: { availableseats: 1}
+      $inc: { availableseats: +1}
     },
     {new: true},
     (err, data) => {
