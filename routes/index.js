@@ -656,7 +656,7 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
         User.find(
           {_id: { $in: data.passengersID } },
           (err, result)=>{
-            console.log(result);
+            console.log(result)
             return res.json({
               code: 200,
               message: "Passenger has been provided",
@@ -665,11 +665,12 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
           }
         )
       }
+    }else{
+      res.json({
+        code: 401,
+        message: "Passenger could not be provided",
+      });
     }
-    return res.json({
-      code: 401,
-      message: "Passenger could not be provided",
-    })
   })
 });
 
