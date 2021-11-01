@@ -656,16 +656,23 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
         User.find(
           {_id: { 
             $in: data.passengersID,
-            $in: data.requestedPassengers
           }},
-          (err, result)=>{
-            console.log(result)
-            return res.json({
-              code: 200,
-              message: "Passenger has been provided",
-              passengers: result,
-              requestedPassengers: result,
-            })
+          (err, passengers)=>{
+            console.log(passengers)
+            User.find(
+              {_id: { 
+                $in: data.requestedPassengers
+              }},
+              (err, requestedPassengers)=>{
+                console.log(requestedPassengers)
+                return res.json({
+                  code: 200,
+                  message: "Passenger has been provided",
+                  passengers: passengers,
+                  requestedpassengers: requestedPassengers,
+                })
+              }
+            )
           }
         )
       }
