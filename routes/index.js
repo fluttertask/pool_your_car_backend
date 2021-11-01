@@ -698,7 +698,7 @@ router.get("/api/ride/listenforrequestedride:id", (req, res)=>{
 
 //Checking for Notifications
 
-router.get("/api/ride/getrequestedride:id", (req, res)=>{
+router.get("/api/ride/requestnotifications/:id", (req, res)=>{
   User.findById(req.params.id)
   .populate('notifications')
   .then((notifications)=>{
