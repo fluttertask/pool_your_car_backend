@@ -44,16 +44,20 @@ const User = mongoose.model("User", {
   },
   notifications: [
     {
-     ride: {
-      type: mongoose.Schema.ObjectId,
-      ref: "Ride",
-     },
-     message: {
-      type: String
-     },
-     read: {
-       type: Boolean
-     }
+      type: {
+        type: String,
+      },
+
+      ride: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Ride",
+      },
+      message: {
+        type: String
+      },
+      read: {
+        type: Boolean
+      }
     },
   ],
   walletID: {

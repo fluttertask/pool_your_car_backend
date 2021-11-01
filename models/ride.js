@@ -44,13 +44,6 @@ const Ride = mongoose.model("Ride", {
     type: Number,
     required: true,
   },
-  requestedPassengers: [
-    {
-      type: mongoose.Schema.ObjectId,
-      seatsbooked: Number,
-      ref: "User",
-    },
-  ],
   passengers: [
     {
       type: mongoose.Schema.ObjectId,
@@ -84,6 +77,14 @@ const Ride = mongoose.model("Ride", {
     type: String,
     required: true,
   },
+
+  requestedPassengers: [
+    {
+      type: mongoose.Schema.ObjectId,
+      seatsbooked: Number,
+      ref: "User",
+    },
+  ],
 
   driverId: {
     type: mongoose.Schema.ObjectId,
