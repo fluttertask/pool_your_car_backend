@@ -654,13 +654,17 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
       if (data != null) {
           
         User.find(
-          {_id: { $in: data.passengersID } },
+          {_id: { 
+            $in: data.passengersID,
+            $in: data.requestedPassengers
+          }},
           (err, result)=>{
             console.log(result)
             return res.json({
               code: 200,
               message: "Passenger has been provided",
               passengers: result,
+              requestedPassengers: result,
             })
           }
         )
@@ -687,7 +691,7 @@ router.get("/api/ride/listenforrequestedride:id", (req, res)=>{
 
 //Listen for user ride
 
-router.get("/api/ride/listenforrequestedride:id", (req, res)=>{
+router.get("/api/ride/startriderequest:id", (req, res)=>{
   Ride.findById(req.params.id)
   .populate('requestedPassengers').
   then((users)=>{
