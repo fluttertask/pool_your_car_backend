@@ -42,6 +42,20 @@ const User = mongoose.model("User", {
   profile_image_url: {
     type: String,
   },
+  notifications: [
+    {
+     ride: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Ride",
+     },
+     message: {
+      type: String
+     },
+     read: {
+       type: Boolean
+     }
+    },
+  ],
   walletID: {
     type: mongoose.Schema.ObjectId,
     ref: "Wallet",
