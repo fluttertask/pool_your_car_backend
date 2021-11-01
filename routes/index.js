@@ -828,16 +828,16 @@ router.post("/api/ride/bookride/:id", (req, res) => {
           (err, doc) => {
             if (!err) {
               console.log(doc);
-              res.json({
-                code: 200,
-                message: "Ride booked successfully",
-                passengers: data.passengersID,
-              });
             } else {
               console.log(err);
             }
           }
         ),
+          res.json({
+            code: 200,
+            message: "Ride booked successfully",
+            passengers: data.passengersID,
+          });
       } else {
         res.json({
           code: 200,
