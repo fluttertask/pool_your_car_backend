@@ -48,6 +48,11 @@ const User = mongoose.model("User", {
         type: String,
       },
 
+      passengerID: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+
       ride: {
         type: mongoose.Schema.ObjectId,
         ref: "Ride",
