@@ -734,7 +734,7 @@ router.post('/api/ride/acceptride', (req, res)=>{
             User.findByIdAndUpdate(
               req.body.passengersID,
               {
-                $push: {
+                $pull: {
                   Notification: {
                     ride: req.body.id,
                     message: "Ride has been accepted"
