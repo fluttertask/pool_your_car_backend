@@ -707,12 +707,12 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
 
 //Accept ride request from the passenger by the Driver
 
-router.post('/api/ride/acceptride:id', (req, res)=>{
+router.post('/api/ride/acceptride', (req, res)=>{
   Ride.findById(
-    req.params.id,
+    req.body.id,
     (ridee)=>{
       Ride.findByIdAndUpdate(
-        req.params.id,
+        req.body.id,
         {
           $push: {passengersID: req.body.passengersID},
           $pull: {requestedpassengers: req.body.passengersID},
@@ -736,7 +736,7 @@ router.post('/api/ride/acceptride:id', (req, res)=>{
               {
                 $push: {
                   Notification: {
-                    ride: req.params.id,
+                    ride: req.body.id,
                     message: "Ride has been accepted"
                   }
                 },
@@ -773,8 +773,9 @@ router.post('/api/ride/rejectride:id', (req, res)=>{
             User.findByIdAndUpdate(
               req.body.passengersID,
               {
-                $push: {
+                $pull: {
                   Notification: {
+                    passengerID: req.body,
                     ride: req.params.id,
                     message: "Ride has been accepted"
                   }
