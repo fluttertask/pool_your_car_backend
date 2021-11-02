@@ -856,10 +856,9 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
       $pull: {requestedPassengers: req.body.userId},
       $pull: {passengersID: req.body.userId},
     },
-    {new: true},
     (err, data) => {
     if (!err) {
-      console.log(data);
+      
 
       if (data != null) {
         User.findOneAndUpdate(
@@ -886,12 +885,13 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               console.log(err);
             }
           }
-        ),
-          res.json({
-            code: 200,
-            message: "Booked ride has been removed successfully",
-            deleteRide: data,
-          });
+        );
+        
+        res.json({
+          code: 200,
+          message: "Booked ride has been removed successfully",
+          deleteRide: data,
+        });
       }
     } else {
       console.log(err);
