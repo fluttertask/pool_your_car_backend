@@ -867,7 +867,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
           { new: true },
           (err, data) => {
             if (!err) {
-              console.log(doc);
+              console.log(data);
             } else {
               console.log(err);
             }
@@ -886,7 +886,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
             }
           }
         );
-        
+
         res.json({
           code: 200,
           message: "Booked ride has been removed successfully",
