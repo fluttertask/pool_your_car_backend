@@ -817,6 +817,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
               User.findOneAndUpdate(
                 { _id: data.driverId},
                 { $push: { notifications: {
+                    passengerID: req.body.userId,
                     type: 'bookrequest',
                     ride: req.params.id,
                     message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
