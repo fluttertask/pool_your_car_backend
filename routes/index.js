@@ -687,10 +687,9 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
 
 //Listening for notification
 
-router.get("/api/ride/listenforrequestedride:id", (req, res)=>{
+router.get("/api/ride/listenfornotifications/:id", (req, res)=>{
   User.findById(req.params.id)
   .populate('notifications')
-  .where({read: false}).
   then((notifications)=>{
     res.json(notifications);
   });
@@ -809,25 +808,29 @@ router.post("/api/ride/bookride/:id", (req, res) => {
       if (data != null) {
 
         User.findOneAndUpdate(
-          { _id: data.driverId},
-          { $push: { notifications: req.params.id } },
-          { new: true },
-          (err, doc) => {
-            if (!err) {
-              console.log(doc);
-            } else {
-              console.log(err);
-            }
-          }
-        ),
-
-        User.findOneAndUpdate(
           { _id: req.body.userId },
           { $push: { bookedride: req.params.id } },
           { new: true },
           (err, doc) => {
             if (!err) {
               console.log(doc);
+              User.findOneAndUpdate(
+                { _id: data.driverId},
+                { $push: { notifications: {
+                    type: 'bookrequest',
+                    ride: req.params.id,
+                    message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
+                    read: false
+                }, } },
+                { new: true },
+                (err, data) => {
+                  if (!err) {
+                    console.log(doc);
+                  } else {
+                    console.log(err);
+                  }
+                }
+              );
             } else {
               console.log(err);
             }
