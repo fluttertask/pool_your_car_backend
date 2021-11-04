@@ -734,9 +734,8 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
           {
             $pull: {
               Notification: {
-                senderID: req.body.userId,
-                ride: req.params.id,
-                read: false
+                senderID: req.body.passengerID,
+                ride: req.body.rideId,
               }
             },
           }
@@ -749,44 +748,38 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
 //Reject ride request from the passenger by the Driver
 
 router.post('/api/ride/rejectbookedride', (req, res)=>{
-  Ride.findById(
-    req.body.id,
-    (ridee)=>{
-      Ride.findByIdAndUpdate(
-        req.body.id,
-        
-        {
-          $push: {passengersID: req.body.passengerID},
-          $pull: {requestedpassengers: req.body.passengerID},
-        },
-        (err, ride) => {
-          if (err){
-            console.log(err);
-            res.json({
-              code: 200,
-              message: "Error In Rejecting Ride"
-            })
-          }else{
-            console.log(ride);
-            User.findByIdAndUpdate(
-              req.body.userId,
-              {
-                $pull: {
-                  Notification: {
-                    senderID: req.body.userId,
-                    ride: req.body.id,
-                    message: "Ride has been rejected"
-                  }
-                },
+  Ride.findByIdAndUpdate(
+    req.body.rideId,
+    
+    {
+      $push: {passengersID: req.body.passengerID},
+      $pull: {requestedpassengers: req.body.passengerID},
+    },
+    (err, ride) => {
+      if (err){
+        console.log(err);
+        res.json({
+          code: 200,
+          message: "Error In Rejecting Ride"
+        })
+      }else{
+        console.log(ride);
+        User.findByIdAndUpdate(
+          req.body.userId,
+          {
+            $pull: {
+              Notification: {
+                senderID: req.body.passengerID,
+                ride: req.body.rideId,
               }
-            )
-            res.json({
-              code: 200,
-              message: "Ride Rejected"
-            })
+            },
           }
-        }
-      )
+        )
+        res.json({
+          code: 200,
+          message: "Ride Rejected"
+        })
+      }
     }
   )
 })
