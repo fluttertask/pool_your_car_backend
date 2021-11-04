@@ -12,6 +12,7 @@ const multer = require("multer");
 const { appendFile } = require("fs");
 const DIR = "./public/images";
 var dateFormat = require("dateformat");
+const { json } = require("body-parser");
 var now = new Date();
 
 var ACCESS_TOKEN_SECRET =
@@ -713,7 +714,7 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
     req.body.rideId,
     {
       $push: {passengersID: req.body.passengerID},
-      $pull: {requestedpassengers: req.body.passengerID},
+      $pull: {requestedPassengers: req.body.passengerID},
       $inc: { availableseats: -1}
     },
     (err, ride) => {
@@ -738,6 +739,13 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
                 ride: req.body.rideId,
               }
             },
+          },
+          (err, doc) =>{
+            if (err) {
+              console.log(err);
+            }else{
+              console.log(doc)
+            }
           }
         )
       }
@@ -753,7 +761,7 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
     
     {
       $push: {passengersID: req.body.passengerID},
-      $pull: {requestedpassengers: req.body.passengerID},
+      $pull: {requestedPassengers: req.body.passengerID},
     },
     (err, ride) => {
       if (err){
@@ -773,6 +781,13 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
                 ride: req.body.rideId,
               }
             },
+          },
+          (err, doc) =>{
+            if (err) {
+              console.log(err);
+            }else{
+              console.log(doc)
+            }
           }
         )
         res.json({
@@ -977,33 +992,54 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
 
 // Start ride by driver
 
-router.post("/api/ride/startride/:id", (req, res) => {
+router.post("/api/ride/startride", (req, res) => {
   Ride.findById(
-    req.params.id,
+    req.body.rideId,
     (err, data) => {
     if (!err) {
       console.log(data);
 
+      var allUserAccepted = true;
+
       if (data != null) {
-        User.updateMany(
-          { _id: {$in: data.passengersID}},
-          { $push: { notifications: {
-              senderID: req.body.userId,
-              type: 'bookrequest',
-              from: data.pickuplocation,
-              to: data.droplocation,
-              ride: req.params.id,
-              message: `Accept to start your ride`,
-              read: false
-          }, } },
-          (err, user) => {
-            if (!err) {
-              console.log(user);
-            } else {
-              console.log(err);
+        await data.passengersID.forEach((id) => {
+          if (!id.acceptStarting){
+            User.findByIdAndUpdate(
+                id,
+                { $push: { notifications: {
+                    senderID: req.body.userId,
+                    type: 'startrequest',
+                    from: data.pickuplocation,
+                    to: data.droplocation,
+                    ride: req.body.rideId,
+                    message: `Accept to start your ride`,
+                    read: false
+                }, } },
+                (err, user) => {
+                  if (!err) {
+                    console.log(user);
+                  } else {
+                    console.log(err);
+                  }
+                }
+              );
+              allUserAccepted = false;
+            }else{
             }
-          }
-        );
+          })
+        if (allUserAccepted){
+          res.json({
+            code: 200,
+            state: true,
+            message: "All user accepted proceed to ride",
+          });
+        }else{
+          res.json({
+            code: 302,
+            state: false,
+            message: "not user have accepted",
+          });
+        }
       } else {
         res.json({
           code: 200,
