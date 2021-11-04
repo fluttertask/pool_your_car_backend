@@ -724,7 +724,7 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
           message: "Error accepting Ride"
         })
       }else{
-        console.log(ride);
+        // console.log(ride);
         res.json({
           code: 200,
           message: "Ride Accepted"
@@ -794,6 +794,7 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
 // Book ride api
 
 router.post("/api/ride/bookride/:id", (req, res) => {
+  console.log(req.body);
   Ride.findByIdAndUpdate(
     req.params.id, 
     {
@@ -802,7 +803,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
     {new: true},
     (err, data) => {
     if (!err) {
-      console.log(data);
+      // console.log(data);
 
       if (data != null) {
 
@@ -812,7 +813,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
           { new: true },
           (err, doc) => {
             if (!err) {
-              console.log(doc);
+              // console.log(doc);
               User.findOneAndUpdate(
                 { _id: data.driverId},
                 { $push: { notifications: {
@@ -828,7 +829,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
                 { new: true },
                 (err, data) => {
                   if (!err) {
-                    console.log(doc);
+                    // console.log(doc);
                   } else {
                     console.log(err);
                   }
@@ -838,12 +839,12 @@ router.post("/api/ride/bookride/:id", (req, res) => {
               console.log(err);
             }
           }
-        ),
-          res.json({
-            code: 200,
-            message: "Ride booked successfully",
-            passengers: data.passengersID,
-          });
+        );
+        res.json({
+          code: 200,
+          message: "Ride booked successfully",
+          passengers: data.passengersID,
+        });
       } else {
         res.json({
           code: 200,
