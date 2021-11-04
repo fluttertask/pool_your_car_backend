@@ -707,7 +707,7 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
 
 //Accept ride request from the passenger by the Driver
 
-router.post('/api/ride/acceptride', (req, res)=>{
+router.post('/api/ride/acceptbookedride', (req, res)=>{
   Ride.findById(
     req.body.id,
     (ridee)=>{
@@ -730,14 +730,20 @@ router.post('/api/ride/acceptride', (req, res)=>{
             res.json({
               code: 200,
               message: "Ride Accepted"
-            })
+            });
             User.findByIdAndUpdate(
               req.body.passengersID,
               {
                 $pull: {
                   Notification: {
-                    ride: req.body.id,
-                    message: "Ride has been accepted"
+                    senderID: req.body.userId,
+                    type: 'bookrequest',
+                    from: ridee.pickuplocation,
+                    to: ridee.droplocation,
+                    ride: req.params.id,
+                    name: doc.firstname,
+                    message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
+                    read: false
                   }
                 },
               }
@@ -751,12 +757,13 @@ router.post('/api/ride/acceptride', (req, res)=>{
 
 //Reject ride request from the passenger by the Driver
 
-router.post('/api/ride/rejectride:id', (req, res)=>{
+router.post('/api/ride/rejectbookedride', (req, res)=>{
   Ride.findById(
-    req.params.id,
+    req.body.id,
     (ridee)=>{
       Ride.findByIdAndUpdate(
-        req.params.id,
+        req.body.id,
+        
         {
           $push: {passengersID: req.body.passengersID},
           $pull: {requestedpassengers: req.body.passengersID},
@@ -775,9 +782,9 @@ router.post('/api/ride/rejectride:id', (req, res)=>{
               {
                 $pull: {
                   Notification: {
-                    passengerID: req.body,
-                    ride: req.params.id,
-                    message: "Ride has been accepted"
+                    passengerID: req.body.passengerID,
+                    ride: req.body.id,
+                    message: "Ride has been rejected"
                   }
                 },
               }
@@ -818,9 +825,12 @@ router.post("/api/ride/bookride/:id", (req, res) => {
               User.findOneAndUpdate(
                 { _id: data.driverId},
                 { $push: { notifications: {
-                    passengerID: req.body.userId,
+                    senderID: req.body.userId,
                     type: 'bookrequest',
+                    from: data.pickuplocation,
+                    to: data.droplocation,
                     ride: req.params.id,
+                    name: doc.firstname,
                     message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
                     read: false
                 }, } },
@@ -927,6 +937,92 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
           } else {
             console.log(err);
           }
+        });
+      }
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+
+// accept ride to start journey by driver
+
+router.post('/api/ride/acceptstartride', (req, res)=>{
+  Ride.findOneAndUpdate(
+    {
+      _id: req.body.id,
+      passengerID: {
+        $elementMatch: {
+          type: req.body.userId
+        }
+      }
+    },
+    {
+      $set: {"passengerID.$.acceptStarting": true},
+    },
+    (err, ride) => {
+      if (err){
+        console.log(err);
+        res.json({
+          code: 200,
+          message: "Error accepting Ride"
+        })
+      }else{
+        console.log(ride);
+        res.json({
+          code: 200,
+          message: "Ride Accepted"
+        });
+        User.findByIdAndUpdate(
+          req.body.driverId,
+          {
+            $push: {
+              Notification: {
+                ride: req.body.id,
+                message: "Ride has been accepted"
+              }
+            },
+          }
+        )
+      }
+    }
+  )
+})
+
+// Start ride by driver
+
+router.post("/api/ride/startride/:id", (req, res) => {
+  Ride.findById(
+    req.params.id,
+    (err, data) => {
+    if (!err) {
+      console.log(data);
+
+      if (data != null) {
+        User.updateMany(
+          { _id: {$in: data.passengersID}},
+          { $push: { notifications: {
+              senderID: req.body.userId,
+              type: 'bookrequest',
+              from: data.pickuplocation,
+              to: data.droplocation,
+              ride: req.params.id,
+              message: `Accept to start your ride`,
+              read: false
+          }, } },
+          (err, user) => {
+            if (!err) {
+              console.log(user);
+            } else {
+              console.log(err);
+            }
+          }
+        );
+      } else {
+        res.json({
+          code: 200,
+          message: "Ride not found",
         });
       }
     } else {

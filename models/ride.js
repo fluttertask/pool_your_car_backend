@@ -95,6 +95,7 @@ const Ride = mongoose.model("Ride", {
     {
       type: mongoose.Schema.ObjectId,
       seatsbooked: Number,
+      acceptStarting: Boolean,
       ref: "User",
     },
   ],

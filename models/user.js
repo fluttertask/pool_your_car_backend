@@ -48,7 +48,7 @@ const User = mongoose.model("User", {
         type: String,
       },
 
-      passengerID: {
+      senderID: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
       },
@@ -57,9 +57,23 @@ const User = mongoose.model("User", {
         type: mongoose.Schema.ObjectId,
         ref: "Ride",
       },
+
+      from: {
+        type: String
+      },
+
+      to: {
+        type: String
+      },
+
+      name: {
+        type: String
+      },
+
       message: {
         type: String
       },
+      
       read: {
         type: Boolean
       }
