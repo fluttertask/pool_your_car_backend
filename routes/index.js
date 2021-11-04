@@ -708,6 +708,7 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
 //Accept ride request from the passenger by the Driver
 
 router.post('/api/ride/acceptbookedride', (req, res)=>{
+  console.log(req.body);
   Ride.findByIdAndUpdate(
     req.body.rideId,
     {
