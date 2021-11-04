@@ -708,44 +708,39 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
 //Accept ride request from the passenger by the Driver
 
 router.post('/api/ride/acceptbookedride', (req, res)=>{
-  Ride.findById(
-    req.body.id,
-    (ridee)=>{
-      Ride.findByIdAndUpdate(
-        req.body.id,
-        {
-          $push: {passengersID: req.body.passengersID},
-          $pull: {requestedpassengers: req.body.passengersID},
-          $inc: { availableseats: -1}
-        },
-        (err, ride) => {
-          if (err){
-            console.log(err);
-            res.json({
-              code: 200,
-              message: "Error accepting Ride"
-            })
-          }else{
-            console.log(ride);
-            res.json({
-              code: 200,
-              message: "Ride Accepted"
-            });
-            User.findByIdAndUpdate(
-              req.body.passengersID,
-              {
-                $pull: {
-                  Notification: {
-                    senderID: req.body.userId,
-                    ride: req.params.id,
-                    read: false
-                  }
-                },
+  Ride.findByIdAndUpdate(
+    req.body.rideId,
+    {
+      $push: {passengersID: req.body.passengerID},
+      $pull: {requestedpassengers: req.body.passengerID},
+      $inc: { availableseats: -1}
+    },
+    (err, ride) => {
+      if (err){
+        console.log(err);
+        res.json({
+          code: 200,
+          message: "Error accepting Ride"
+        })
+      }else{
+        console.log(ride);
+        res.json({
+          code: 200,
+          message: "Ride Accepted"
+        });
+        User.findByIdAndUpdate(
+          req.body.userId,
+          {
+            $pull: {
+              Notification: {
+                senderID: req.body.userId,
+                ride: req.params.id,
+                read: false
               }
-            )
+            },
           }
-        }
-      )
+        )
+      }
     }
   )
 })
@@ -760,8 +755,8 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
         req.body.id,
         
         {
-          $push: {passengersID: req.body.passengersID},
-          $pull: {requestedpassengers: req.body.passengersID},
+          $push: {passengersID: req.body.passengerID},
+          $pull: {requestedpassengers: req.body.passengerID},
         },
         (err, ride) => {
           if (err){
@@ -773,11 +768,11 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
           }else{
             console.log(ride);
             User.findByIdAndUpdate(
-              req.body.passengersID,
+              req.body.userId,
               {
                 $pull: {
                   Notification: {
-                    senderID: req.body.passengerID,
+                    senderID: req.body.userId,
                     ride: req.body.id,
                     message: "Ride has been rejected"
                   }
