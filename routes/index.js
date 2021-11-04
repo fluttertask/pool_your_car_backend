@@ -737,12 +737,7 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
                 $pull: {
                   Notification: {
                     senderID: req.body.userId,
-                    type: 'bookrequest',
-                    from: ridee.pickuplocation,
-                    to: ridee.droplocation,
                     ride: req.params.id,
-                    name: doc.firstname,
-                    message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
                     read: false
                   }
                 },
@@ -782,7 +777,7 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
               {
                 $pull: {
                   Notification: {
-                    passengerID: req.body.passengerID,
+                    senderID: req.body.passengerID,
                     ride: req.body.id,
                     message: "Ride has been rejected"
                   }
