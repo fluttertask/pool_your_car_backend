@@ -951,7 +951,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
 router.post('/api/ride/acceptstartride', (req, res)=>{
   Ride.findOneAndUpdate(
     {
-      _id: req.body.id,
+      _id: req.body.rideId,
       passengerID: {
         $elementMatch: {
           type: req.body.userId
@@ -975,9 +975,25 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
           message: "Ride Accepted"
         });
         User.findByIdAndUpdate(
-          req.body.driverId,
+          ride.driverId,
           {
             $push: {
+              Notification: {
+                ride: req.body.rideId,
+                senderID: req.body.userId,
+                message: "Ride has been accepted",
+                type: 'startaccepted',
+                from: data.pickuplocation,
+                to: data.droplocation,
+                read: false
+              }
+            },
+          }
+        )
+        User.findByIdAndUpdate(
+          req.body.driverId,
+          {
+            $pull: {
               Notification: {
                 ride: req.body.id,
                 message: "Ride has been accepted"
