@@ -1018,7 +1018,7 @@ router.post("/api/ride/startride", (req, res) => {
       var allUserAccepted = true;
 
       if (data != null) {
-        await data.passengersID.forEach((id) => {
+        data.passengersID.forEach((id) => {
           if (!id.acceptStarting){
             User.findByIdAndUpdate(
                 id,
