@@ -1019,6 +1019,7 @@ router.post("/api/ride/startride", (req, res) => {
 
       if (data != null) {
         data.passengersID.forEach((id) => {
+          console.log(id);
           if (!id.acceptStarting){
             User.findByIdAndUpdate(
                 id,
