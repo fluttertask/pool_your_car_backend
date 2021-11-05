@@ -734,7 +734,7 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
           req.body.userId,
           {
             $pull: {
-              Notification: {
+              notifications: {
                 senderID: req.body.passengerID,
                 ride: req.body.rideId,
               }
@@ -776,7 +776,7 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
           req.body.userId,
           {
             $pull: {
-              Notification: {
+              notifications: {
                 senderID: req.body.passengerID,
                 ride: req.body.rideId,
               }
@@ -978,7 +978,7 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
           ride.driverId,
           {
             $push: {
-              Notification: {
+              notifications: {
                 ride: req.body.rideId,
                 senderID: req.body.userId,
                 message: "Ride has been accepted",
