@@ -91,6 +91,16 @@ const Ride = mongoose.model("Ride", {
     ref: "User",
     required: true,
   },
+
+  readyPassengersID: [
+    {
+      type: mongoose.Schema.ObjectId,
+      seatsbooked: Number,
+      acceptStarting: Boolean,
+      ref: "User"
+    }
+  ],
+
   passengersID: [
     {
       type: mongoose.Schema.ObjectId,

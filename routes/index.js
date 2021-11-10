@@ -891,6 +891,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
     {
       $pull: {requestedPassengers: req.body.userId},
       $pull: {PassengersID: req.body.userId},
+      $pull: {readyPassengersID: req.body.userId},
       $inc: { availableseats: +1}
     },
     (err, data) => {
@@ -975,6 +976,10 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
       }
     },
     {
+      $push: {
+        readyPassengersID: req.body.userId
+      },
+
       $set: {"passengerID.$.acceptStarting": true},
     },
     (err, ride) => {
@@ -1103,6 +1108,7 @@ router.post("/api/ride/startride", (req, res) => {
           });
         }else{
           data.passengersID.forEach((id) => {
+            console.log('id');
             console.log(id);
             if (!id.acceptStarting){
               User.findByIdAndUpdate(
@@ -1148,6 +1154,65 @@ router.post("/api/ride/startride", (req, res) => {
           code: 200,
           message: "Ride not found",
         });
+      }
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+
+router.post("/api/ride/endbookedride/:id", (req, res) => {
+  console.log(req.params.id);
+  console.log(req.body);
+  Ride.findByIdAndUpdate(
+    req.params.id, 
+    {
+      $pull: {requestedPassengers: req.body.userId},
+      $pull: {PassengersID: req.body.userId},
+      $pull: {readyPassengersID: req.body.userId},
+      $inc: { availableseats: +1}
+    },
+    (err, data) => {
+    if (!err) {
+      console.log(data);
+
+      if (data != null) {
+
+        User.findOneAndUpdate(
+          { _id: req.body.userId },
+          { $push: { pastbookedride: req.params.id } },
+          { $pull: { bookedride: req.params.id } },
+          { new: true },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
+          }
+        );
+
+        User.findOneAndUpdate(
+          { _id: data.userId },
+          { $push: { pastofferedride: req.params.id } },
+          { $pull: { offeredride: req.params.id } },
+          { new: true },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
+          }
+        );
+          res.json({
+            code: 200,
+            message: "Ride has ended successfully",
+            deleteRide: data,
+          });
+
+        
       }
     } else {
       console.log(err);
