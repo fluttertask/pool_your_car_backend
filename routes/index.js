@@ -1118,6 +1118,7 @@ router.post("/api/ride/startride", (req, res) => {
                   }, } },
                   (err, user) => {
                     if (!err) {
+                      console.log('user');
                       console.log(user);
                     } else {
                       console.log(err);
