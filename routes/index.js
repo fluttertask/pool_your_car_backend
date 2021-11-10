@@ -706,6 +706,21 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
   });
 })
 
+router.post("/api/ride/cancelnotification/", (req, res)=>{
+  User.findOneAndUpdate({
+
+      _id: req.body.userId,
+      senderID: req.body.senderID
+    },
+    {
+      $pull: {
+        'notifications.$.senderID': senderID},
+    })
+  .then((data)=>{
+    res.json(notifications);
+  });
+})
+
 //Accept ride request from the passenger by the Driver
 
 router.post('/api/ride/acceptbookedride', (req, res)=>{
@@ -869,13 +884,15 @@ router.post("/api/ride/bookride/:id", (req, res) => {
 //cancel booked ride api
 
 router.post("/api/ride/cancelbookedride/:id", (req, res) => {
+  console.log(req.params.id);
+  console.log(req.body);
   Ride.findByIdAndUpdate(
     req.params.id, 
     {
       $pull: {requestedPassengers: req.body.userId},
+      $pull: {PassengersID: req.body.userId},
       $inc: { availableseats: +1}
     },
-    {new: true},
     (err, data) => {
     if (!err) {
       console.log(data);
@@ -896,7 +913,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
         ),
           res.json({
             code: 200,
-            message: "Booked ride has been removed successfully",
+            message: "Ride has been cancelled successfully",
             deleteRide: data,
           });
       } else {
@@ -914,7 +931,6 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               User.findOneAndUpdate(
                 { _id: req.body.userId },
                 { $pull: { bookedride: req.params.id } },
-                { new: true },
                 (err, doc) => {
                   if (!err) {
                     console.log(doc);
@@ -1006,6 +1022,66 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
   )
 })
 
+// Cancel the request the start ride
+
+router.post('/api/ride/cancelstartride', (req, res)=>{
+  Ride.findOneAndUpdate(
+    {
+      _id: req.body.rideId,
+      passengerID: {
+        $elementMatch: {
+          type: req.body.userId
+        }
+      }
+    },
+    {
+      $set: {"passengerID.$.acceptStarting": false},
+    },
+    (err, ride) => {
+      if (err){
+        console.log(err);
+        res.json({
+          code: 200,
+          message: "Error canceling Ride"
+        })
+      }else{
+        console.log(ride);
+        res.json({
+          code: 200,
+          message: "Ride Cancelled"
+        });
+        User.findByIdAndUpdate(
+          ride.driverId,
+          {
+            $push: {
+              notifications: {
+                ride: req.body.rideId,
+                senderID: req.body.userId,
+                message: "Ride has been declined",
+                type: 'startaccepted',
+                from: data.pickuplocation,
+                to: data.droplocation,
+                read: false
+              }
+            },
+          }
+        )
+        User.findByIdAndUpdate(
+          req.body.driverId,
+          {
+            $pull: {
+              Notification: {
+                ride: req.body.id,
+                message: "Ride has been accepted"
+              }
+            },
+          }
+        )
+      }
+    }
+  )
+})
+
 // Start ride by driver
 
 router.post("/api/ride/startride", (req, res) => {
@@ -1016,46 +1092,55 @@ router.post("/api/ride/startride", (req, res) => {
       console.log(data);
 
       var allUserAccepted = true;
+      var d = [];
 
       if (data != null) {
-        data.passengersID.forEach((id) => {
-          console.log(id);
-          if (!id.acceptStarting){
-            User.findByIdAndUpdate(
-                id,
-                { $push: { notifications: {
-                    senderID: req.body.userId,
-                    type: 'startrequest',
-                    from: data.pickuplocation,
-                    to: data.droplocation,
-                    ride: req.body.rideId,
-                    message: `Accept to start your ride`,
-                    read: false
-                }, } },
-                (err, user) => {
-                  if (!err) {
-                    console.log(user);
-                  } else {
-                    console.log(err);
-                  }
-                }
-              );
-              allUserAccepted = false;
-            }else{
-            }
-          })
-        if (allUserAccepted){
+        if (data.passengersID.length == 0){
           res.json({
             code: 200,
             state: true,
-            message: "All user accepted proceed to ride",
+            message: "can't start a ride without passenger",
           });
         }else{
-          res.json({
-            code: 302,
-            state: false,
-            message: "not user have accepted",
-          });
+          data.passengersID.forEach((id) => {
+            console.log(id);
+            if (!id.acceptStarting){
+              User.findByIdAndUpdate(
+                  id,
+                  { $push: { notifications: {
+                      senderID: req.body.userId,
+                      type: 'startrequest',
+                      from: data.pickuplocation,
+                      to: data.droplocation,
+                      ride: req.body.rideId,
+                      message: `Accept to start your ride`,
+                      read: false
+                  }, } },
+                  (err, user) => {
+                    if (!err) {
+                      console.log(user);
+                    } else {
+                      console.log(err);
+                    }
+                  }
+                );
+                allUserAccepted = false;
+              }else{
+              }
+            })
+          if (allUserAccepted){
+            res.json({
+              code: 200,
+              state: true,
+              message: "All user accepted proceed to ride",
+            });
+          }else{
+            res.json({
+              code: 302,
+              state: false,
+              message: "Users have accepted",
+            });
+          }
         }
       } else {
         res.json({
