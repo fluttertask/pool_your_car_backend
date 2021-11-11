@@ -1025,7 +1025,7 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
       }
     }
   )
-})
+});
 
 // Cancel the request the start ride
 
@@ -1106,11 +1106,17 @@ router.post("/api/ride/startride", (req, res) => {
             state: true,
             message: "can't start a ride without passenger",
           });
+        }else if(data.passengersID.length == data.readyPassengersID.length){
+          res.json({
+            code: 200,
+            state: true,
+            message: "All user accepted proceed to ride",
+          });
         }else{
           data.passengersID.forEach((id) => {
             console.log('id');
             console.log(id);
-            if (!id.acceptStarting){
+            if (!data.readyPassengersID.includes(id)){
               User.findByIdAndUpdate(
                   id,
                   { $push: { notifications: {
@@ -1133,21 +1139,14 @@ router.post("/api/ride/startride", (req, res) => {
                 );
                 allUserAccepted = false;
               }else{
-              }
-            })
-          if (allUserAccepted){
-            res.json({
-              code: 200,
-              state: true,
-              message: "All user accepted proceed to ride",
-            });
-          }else{
-            res.json({
-              code: 302,
-              state: false,
-              message: "Users have accepted",
-            });
-          }
+            }
+          })
+
+          res.json({
+            code: 302,
+            state: false,
+            message: "Passengers haven't accepted accepted",
+          });
         }
       } else {
         res.json({
@@ -1181,20 +1180,6 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 
         User.findOneAndUpdate(
           { _id: req.body.userId },
-          { $push: { pastbookedride: req.params.id } },
-          { $pull: { bookedride: req.params.id } },
-          { new: true },
-          (err, doc) => {
-            if (!err) {
-              console.log(doc);
-            } else {
-              console.log(err);
-            }
-          }
-        );
-
-        User.findOneAndUpdate(
-          { _id: data.userId },
           { $push: { pastofferedride: req.params.id } },
           { $pull: { offeredride: req.params.id } },
           { new: true },
@@ -1206,6 +1191,22 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
             }
           }
         );
+
+        data.passengersID.forEach((id)=>{
+          User.findOneAndUpdate(
+            { _id: id },
+            { $push: { pastbookedride: req.params.id } },
+            { $pull: { bookedride: req.params.id } },
+            { new: true },
+            (err, doc) => {
+              if (!err) {
+                console.log(doc);
+              } else {
+                console.log(err);
+              }
+            }
+          );
+        });
           res.json({
             code: 200,
             message: "Ride has ended successfully",
