@@ -1108,10 +1108,10 @@ router.post("/api/ride/startride", (req, res) => {
                   id,
                   (err, user) => {
                     if (!err) {
-                      if (user.notification.senderID == req.body.userId
-                          && user.notification.type == 'startrequest'
-                          && user.notification.ride == req.body.rideId
-                          && user.notification.message == `Accept to start your ride`){
+                      if (user.notifications.senderID == req.body.userId
+                          && user.notifications.type == 'startrequest'
+                          && user.notification.sride == req.body.rideId
+                          && user.notifications.message == `Accept to start your ride`){
                         User.findByIdAndUpdate(
                           id,
                           { $push: { notifications: {
