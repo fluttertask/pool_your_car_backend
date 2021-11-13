@@ -1084,7 +1084,6 @@ router.post("/api/ride/startride", (req, res) => {
     req.body.rideId,
     (err, data) => {
     if (!err) {
-      // console.log(data);
 
       if (data != null) {
         if (data.passengersID.length == 0){
@@ -1101,18 +1100,16 @@ router.post("/api/ride/startride", (req, res) => {
           });
         }else{
           data.passengersID.forEach((id) => {
-            // console.log('id');
-            // console.log(id);
             if (!data.readyPassengersID.includes(id)){
               User.findById(
                   id,
                   (err, user) => {
                     if (!err) {
-                      console.log(user);
+                      // console.log(user);
                       if (user.notifications){
                         if (user.notifications.senderID == req.body.userId
                             && user.notifications.type == 'startrequest'
-                            && user.notifications.sride == req.body.rideId
+                            && user.notifications.ride == req.body.rideId
                             && user.notifications.message == `Accept to start your ride`){
                           User.findByIdAndUpdate(
                             id,
@@ -1128,7 +1125,6 @@ router.post("/api/ride/startride", (req, res) => {
                             (err, userss) => {
                               if (!err) {
                                 console.log('user');
-                                console.log(userss);
                               } else {
                                 console.log(err);
                               }
@@ -1149,7 +1145,7 @@ router.post("/api/ride/startride", (req, res) => {
           res.json({
             code: 302,
             state: false,
-            message: "Passengers haven't accepted accepted",
+            message: "Passengers haven't accepted ride",
           });
         }
       } else {
