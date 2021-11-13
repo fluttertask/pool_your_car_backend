@@ -708,13 +708,16 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
 
 router.post("/api/ride/cancelnotification/", (req, res)=>{
   User.findOneAndUpdate({
-
       _id: req.body.userId,
-      senderID: req.body.senderID
+      senderID: req.body.passengerID
     },
     {
       $pull: {
-        'notifications.$.senderID': senderID},
+        notifications: {
+          ride: req.body.rideId,
+          senderID: req.body.senderID
+        }
+      }
     })
   .then((data)=>{
     res.json(notifications);
@@ -775,7 +778,6 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
     req.body.rideId,
     
     {
-      $push: {passengersID: req.body.passengerID},
       $pull: {requestedPassengers: req.body.passengerID},
     },
     (err, ride) => {
@@ -1028,18 +1030,8 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
 // Cancel the request the start ride
 
 router.post('/api/ride/cancelstartride', (req, res)=>{
-  Ride.findOneAndUpdate(
-    {
-      _id: req.body.rideId,
-      passengerID: {
-        $elementMatch: {
-          type: req.body.userId
-        }
-      }
-    },
-    {
-      $set: {"passengerID.$.acceptStarting": false},
-    },
+  Ride.findById(
+    req.body.rideId,
     (err, ride) => {
       if (err){
         console.log(err);
@@ -1125,8 +1117,31 @@ router.post("/api/ride/startride", (req, res) => {
                   }, } },
                   (err, user) => {
                     if (!err) {
-                      console.log('user');
-                      console.log(user);
+                      if (user.notification.senderID == req.body.userId
+                          && user.notification.type == 'startrequest'
+                          && user.notification.ride == req.body.rideId
+                          && user.notification.message == `Accept to start your ride`){
+                        User.findByIdAndUpdate(
+                          id,
+                          { $push: { notifications: {
+                              senderID: req.body.userId,
+                              type: 'startrequest',
+                              from: data.pickuplocation,
+                              to: data.droplocation,
+                              ride: req.body.rideId,
+                              message: `Accept to start your ride`,
+                              read: false
+                          }, } },
+                          (err, user) => {
+                            if (!err) {
+                              console.log('user');
+                              console.log(user);
+                            } else {
+                              console.log(err);
+                            }
+                          }
+                        );
+                      }
                     } else {
                       console.log(err);
                     }
