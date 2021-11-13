@@ -971,11 +971,6 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
   Ride.findOneAndUpdate(
     {
       _id: req.body.rideId,
-      passengerID: {
-        $elementMatch: {
-          type: req.body.userId
-        }
-      }
     },
     {
       $push: {
