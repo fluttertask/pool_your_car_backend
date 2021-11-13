@@ -1108,32 +1108,32 @@ router.post("/api/ride/startride", (req, res) => {
                   id,
                   (err, user) => {
                     if (!err) {
-                      if (user.notifications.senderID == req.body.userId
-                          && user.notifications.type == 'startrequest'
-                          && user.notification.sride == req.body.rideId
-                          && user.notifications.message == `Accept to start your ride`){
-                        User.findByIdAndUpdate(
-                          id,
-                          { $push: { notifications: {
-                              senderID: req.body.userId,
-                              type: 'startrequest',
-                              from: data.pickuplocation,
-                              to: data.droplocation,
-                              ride: req.body.rideId,
-                              message: `Accept to start your ride`,
-                              read: false
-                          }, } },
-                          (err, user) => {
-                            if (!err) {
-                              console.log('user');
-                              console.log(user);
-                            } else {
-                              console.log(err);
+                      if (user.notifications){
+                        if (user.notifications.senderID == req.body.userId
+                            && user.notifications.type == 'startrequest'
+                            && user.notification.sride == req.body.rideId
+                            && user.notifications.message == `Accept to start your ride`){
+                          User.findByIdAndUpdate(
+                            id,
+                            { $push: { notifications: {
+                                senderID: req.body.userId,
+                                type: 'startrequest',
+                                from: data.pickuplocation,
+                                to: data.droplocation,
+                                ride: req.body.rideId,
+                                message: `Accept to start your ride`,
+                                read: false
+                            }, } },
+                            (err, user) => {
+                              if (!err) {
+                                console.log('user');
+                                console.log(user);
+                              } else {
+                                console.log(err);
+                              }
                             }
-                          }
-                        );
-                      }else {
-                        
+                          );
+                        }
                       }
                     } else {
                       console.log(err);
@@ -1144,6 +1144,12 @@ router.post("/api/ride/startride", (req, res) => {
               }else{
             }
           })
+          
+          res.json({
+            code: 302,
+            state: false,
+            message: "Passengers haven't accepted accepted",
+          });
         }
       } else {
         res.json({
