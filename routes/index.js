@@ -979,8 +979,6 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
       $push: {
         readyPassengersID: req.body.userId
       },
-
-      $set: {"passengerID.$.acceptStarting": true},
     },
     (err, ride) => {
       if (err){
@@ -1096,14 +1094,11 @@ router.post("/api/ride/startride", (req, res) => {
     if (!err) {
       console.log(data);
 
-      var allUserAccepted = true;
-      var d = [];
-
       if (data != null) {
         if (data.passengersID.length == 0){
           res.json({
-            code: 200,
-            state: true,
+            code: 300,
+            state: false,
             message: "can't start a ride without passenger",
           });
         }else if(data.passengersID.length == data.readyPassengersID.length){
@@ -1150,7 +1145,8 @@ router.post("/api/ride/startride", (req, res) => {
         }
       } else {
         res.json({
-          code: 200,
+          code: 300,
+          state: false,
           message: "Ride not found",
         });
       }
