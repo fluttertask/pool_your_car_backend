@@ -1112,7 +1112,7 @@ router.post("/api/ride/startride", (req, res) => {
                       if (user.notifications){
                         if (user.notifications.senderID == req.body.userId
                             && user.notifications.type == 'startrequest'
-                            && user.notification.sride == req.body.rideId
+                            && user.notifications.sride == req.body.rideId
                             && user.notifications.message == `Accept to start your ride`){
                           User.findByIdAndUpdate(
                             id,
