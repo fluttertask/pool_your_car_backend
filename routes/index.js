@@ -720,7 +720,10 @@ router.post("/api/ride/cancelnotification/", (req, res)=>{
       }
     })
   .then((user)=>{
-    res.json(user.notifications);
+    res.json({
+      code: 200,
+      message: "Accepted"
+    });
   });
 })
 
