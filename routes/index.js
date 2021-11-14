@@ -1006,13 +1006,13 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
             },
           }
         );
-        console.log(req.body.driverId);
+
         User.findByIdAndUpdate(
-          req.body.driverId,
+          req.body.userId,
           {
             $pull: {
               Notification: {
-                ride: req.body.id,
+                ride: req.body.rideId,
                 message: "Ride has been accepted"
               }
             },
@@ -1050,19 +1050,19 @@ router.post('/api/ride/cancelstartride', (req, res)=>{
                 senderID: req.body.userId,
                 message: "Ride has been declined",
                 type: 'startaccepted',
-                from: data.pickuplocation,
-                to: data.droplocation,
+                from: ride.pickuplocation,
+                to: ride.droplocation,
                 read: false
               }
             },
           }
         )
         User.findByIdAndUpdate(
-          req.body.driverId,
+          req.body.userId,
           {
             $pull: {
               Notification: {
-                ride: req.body.id,
+                ride: req.body.rideId,
                 message: "Ride has been accepted"
               }
             },
