@@ -1011,7 +1011,7 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
           req.body.userId,
           {
             $pull: {
-              Notification: {
+              notifications: {
                 ride: req.body.rideId,
                 message: `Accept to start your ride`,
               }
@@ -1061,7 +1061,7 @@ router.post('/api/ride/cancelstartride', (req, res)=>{
           req.body.userId,
           {
             $pull: {
-              Notification: {
+              notifications: {
                 ride: req.body.rideId,
                 message: `Accept to start your ride`,
               }
