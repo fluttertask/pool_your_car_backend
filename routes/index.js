@@ -709,13 +709,12 @@ router.get("/api/ride/requestnotifications/:id", (req, res)=>{
 router.post("/api/ride/cancelnotification/", (req, res)=>{
   User.findOneAndUpdate({
       _id: req.body.userId,
-      senderID: req.body.passengerID
     },
     {
       $pull: {
         notifications: {
           ride: req.body.rideId,
-          senderID: req.body.senderID
+          senderID: req.body.passengerID
         }
       }
     })
