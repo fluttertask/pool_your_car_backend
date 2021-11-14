@@ -1005,7 +1005,8 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
               }
             },
           }
-        )
+        );
+        console.log(req.body.driverId);
         User.findByIdAndUpdate(
           req.body.driverId,
           {
