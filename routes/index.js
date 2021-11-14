@@ -719,8 +719,8 @@ router.post("/api/ride/cancelnotification/", (req, res)=>{
         }
       }
     })
-  .then((data)=>{
-    res.json(notifications);
+  .then((user)=>{
+    res.json(user.notifications);
   });
 })
 
