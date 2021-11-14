@@ -1004,6 +1004,13 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
                 read: false
               }
             },
+          },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
           }
         );
 
@@ -1016,6 +1023,13 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
                 message: `Accept to start your ride`,
               }
             },
+          },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
           }
         )
       }
@@ -1055,6 +1069,13 @@ router.post('/api/ride/cancelstartride', (req, res)=>{
                 read: false
               }
             },
+          },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
           }
         )
         User.findByIdAndUpdate(
@@ -1066,6 +1087,13 @@ router.post('/api/ride/cancelstartride', (req, res)=>{
                 message: `Accept to start your ride`,
               }
             },
+          },
+          (err, doc) => {
+            if (!err) {
+              console.log(doc);
+            } else {
+              console.log(err);
+            }
           }
         )
       }
