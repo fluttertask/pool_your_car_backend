@@ -1013,7 +1013,7 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
             $pull: {
               Notification: {
                 ride: req.body.rideId,
-                message: "Ride has been accepted"
+                message: `Accept to start your ride`,
               }
             },
           }
@@ -1063,7 +1063,7 @@ router.post('/api/ride/cancelstartride', (req, res)=>{
             $pull: {
               Notification: {
                 ride: req.body.rideId,
-                message: "Ride has been accepted"
+                message: `Accept to start your ride`,
               }
             },
           }
