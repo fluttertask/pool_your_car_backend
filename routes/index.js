@@ -999,8 +999,8 @@ router.post('/api/ride/acceptstartride', (req, res)=>{
                 senderID: req.body.userId,
                 message: "Ride has been accepted",
                 type: 'startaccepted',
-                from: data.pickuplocation,
-                to: data.droplocation,
+                from: ride.pickuplocation,
+                to: ride.droplocation,
                 read: false
               }
             },
