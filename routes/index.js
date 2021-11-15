@@ -1131,6 +1131,16 @@ router.post("/api/ride/startride", (req, res) => {
                   id,
                   (err, user) => {
                     if (!err) {
+
+                      console.log(!user.notifications.includes({
+                        senderID: req.body.userId,
+                        type: 'startrequest',
+                        from: data.pickuplocation,
+                        to: data.droplocation,
+                        ride: req.body.rideId,
+                        message: `Accept to start your ride`
+                      }));
+
                       if (user.notifications){
                         if (!user.notifications.includes({
                           senderID: req.body.userId,
