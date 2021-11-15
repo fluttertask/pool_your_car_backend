@@ -1110,7 +1110,7 @@ router.post("/api/ride/startride", (req, res) => {
     req.body.rideId,
     (err, data) => {
     if (!err) {
-
+      var sentNotification = false;
       if (data != null) {
         if (data.passengersID.length == 0){
           res.json({
@@ -1133,10 +1133,15 @@ router.post("/api/ride/startride", (req, res) => {
                     if (!err) {
                       // console.log(user);
                       if (user.notifications){
-                        if (user.notifications.senderID == req.body.userId
-                            && user.notifications.type == 'startrequest'
-                            && user.notifications.ride == req.body.rideId
-                            && user.notifications.message == `Accept to start your ride`){
+                        if (user.notifications.includes({
+                          senderID: req.body.userId,
+                          type: 'startrequest',
+                          from: data.pickuplocation,
+                          to: data.droplocation,
+                          ride: req.body.rideId,
+                          message: `Accept to start your ride`
+                      })){
+                          sentNotification = true;
                           User.findByIdAndUpdate(
                             id,
                             { $push: { notifications: {
@@ -1163,16 +1168,22 @@ router.post("/api/ride/startride", (req, res) => {
                     }
                   }
                 );
-                allUserAccepted = false;
               }else{
             }
           })
-
-          res.json({
-            code: 302,
-            state: false,
-            message: "Passengers haven't accepted ride",
-          });
+          if (sentNotification){
+            res.json({
+              code: 302,
+              state: false,
+              message: "Request to start have been sent",
+            });
+          }else{
+            res.json({
+              code: 302,
+              state: false,
+              message: "Passengers haven't accepted ride",
+            });
+          }
         }
       } else {
         res.json({
