@@ -1333,7 +1333,8 @@ Admin.findOne(
 
 //Admin Login
 router.post("/api/admin/login", (req, res) => {
-  Admin.findOne({ email: req.body.email }, (err, admin) => {
+  console.log(req.body.email);
+  Admin.findOne({ email: req.body.email}, (err, admin) => {
     console.log("my email" + admin);
     if (admin == null) {
       res.status(400).json("Invalid email ");
