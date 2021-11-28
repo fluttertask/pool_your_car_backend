@@ -95,12 +95,13 @@ router.post("/api/user/login", (req, res) => {
 var authenticateToken = function (req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
+  console.log(token);
   if (token == null) {
-    return res.sendStatus(401).json("Access Token Not Found");
+    return res.status(401).json("Access Token Not Found");
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.sendStatus(403).json("Access Token Expired");
+      return res.status(403).json("Access Token Expired");
     }
     req.user = user;
     next(req, res);
