@@ -92,7 +92,7 @@ router.post("/api/user/login", (req, res) => {
   });
 });
 
-module.exports.authenticateToken = function (req, res, next) {
+var authenticateToken = function (req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
@@ -1336,7 +1336,7 @@ router.post("/api/admin/login", (req, res) => {
 });
 
 //Block User
-router.post(this.authenticateToken, "/api/admin/blockuser", (req, res) => {
+router.post(authenticateToken, "/api/admin/blockuser", (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
@@ -1353,7 +1353,7 @@ router.post(this.authenticateToken, "/api/admin/blockuser", (req, res) => {
 });
 
 //Unblock User
-router.post(this.authenticateToken, "/api/admin/unblockuser", (req, res) => {
+router.post(authenticateToken, "/api/admin/unblockuser", (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
