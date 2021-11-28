@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const { Ride } = require("../models/ride");
 const { User } = require("../models/user");
+const { Admin } = require("../models/admin");
 const users_collection = "users";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -1275,6 +1276,34 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 // ADMIN API
 
 //Admin Signup
+
+var admin = {
+  email: "jude@gmail.com",
+  password: bcrypt.hashSync("J123456", 10),
+  createdOn: Date.now(),
+};
+
+Admin.findOne(
+  {
+    email: admin.email,
+  },
+  function (err, result) {
+    if (!result) {
+      User.create(newuser)
+        .then(
+          (user) => {
+            console.log("User has been Added ", user);
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.json(user);
+          },
+          (err) => next(err)
+        )
+        .catch((err) => next(err));
+    }
+  }
+);
+
 router.post("/api/admin/add", (req, res, next) => {
   var datetime = new Date();
   date = datetime.toJSON();
