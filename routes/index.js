@@ -1289,7 +1289,7 @@ Admin.findOne(
   },
   function (err, result) {
     if (!result) {
-      User.create(admin)
+      Admin.create(admin)
         .then(
           (user) => {
             console.log("User has been Added ", user);
@@ -1304,31 +1304,31 @@ Admin.findOne(
   }
 );
 
-router.post("/api/admin/add", (req, res, next) => {
-  var datetime = new Date();
-  date = datetime.toJSON();
-  console.log(req.body);
-  let hash = bcrypt.hashSync(req.body.password, 10);
+// router.get("/api/admin/add", (req, res, next) => {
+//   var datetime = new Date();
+//   date = datetime.toJSON();
+//   console.log(req.body);
+//   let hash = bcrypt.hashSync(req.body.password, 10);
 
-  var newuser = {
-    email: req.body.email,
-    password: hash,
-    created: Date.now(),
-  };
+//   var admin = {
+//   email: "jude@gmail.com",
+//   password: bcrypt.hashSync("J123456", 10),
+//   createdOn: Date.now(),
+// };
 
-  User.create(newuser)
-    .then(
-      (user) => {
-        console.log("User has been Added ", user);
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.json(user);
-      },
-      (err) => next(err)
-    )
-    .catch((err) => next(err));
-  }
-);
+//   User.create(newuser)
+//     .then(
+//       (user) => {
+//         console.log("User has been Added ", user);
+//         res.statusCode = 200;
+//         res.setHeader("Content-Type", "application/json");
+//         res.json(user);
+//       },
+//       (err) => next(err)
+//     )
+//     .catch((err) => next(err));
+//   }
+// );
 
 
 //Admin Login
