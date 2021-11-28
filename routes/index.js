@@ -94,13 +94,13 @@ router.post("/api/user/login", (req, res) => {
 
 var authenticateToken = function (req, res, next) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1];
   if (token == null) {
-    return res.sendStatus(401);
+    return res.sendStatus(401).json("Access Token Not Found");
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.sendStatus(403);
+      return res.sendStatus(403).json("Access Token Expired");
     }
     req.user = user;
     next(req, res);
@@ -364,36 +364,49 @@ router.get("/api/ride/getoverallofferedrides", (req, res) => {
 
 //Add Ride
 router.post("/api/ride/add", (req, res, next) => {
-  Ride.create(req.body)
-    .then(
-      (ride) => {
-        console.log("Ride has been Added ", ride);
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        // res.json(ride);
-        console.log(ride._id);
+  User.findById(
+    req.body.driverId,
+    (err, result) => {
+      if (result.blocked == true){
+        res.status(200).json({
+          code: 400,
+          message: "Blocked User, Please Contact Admin",
+          updateUser: doc,
+        });
+      }else{
+        Ride.create(req.body)
+        .then(
+          (ride) => {
+            console.log("Ride has been Added ", ride);
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            // res.json(ride);
+            console.log(ride._id);
 
-        User.findOneAndUpdate(
-          { _id: req.body.driverId },
-          { $push: { offeredride: ride._id } },
-          { new: true },
-          (err, doc) => {
-            if (!err) {
-              console.log(doc);
-              res.status(200).json({
-                code: 200,
-                message: "Ride created for Users",
-                updateUser: doc,
-              });
-            } else {
-              console.log(err);
-            }
-          }
-        );
-      },
-      (err) => next(err)
-    )
-    .catch((err) => next(err));
+            User.findOneAndUpdate(
+              { _id: req.body.driverId },
+              { $push: { offeredride: ride._id } },
+              { new: true },
+              (err, doc) => {
+                if (!err) {
+                  console.log(doc);
+                  res.status(200).json({
+                    code: 200,
+                    message: "Ride created for Users",
+                    updateUser: doc,
+                  });
+                } else {
+                  console.log(err);
+                }
+              }
+            );
+          },
+          (err) => next(err)
+        )
+        .catch((err) => next(err));
+      }
+    }
+  )
 });
 
 //Get single Offered Ride of user
