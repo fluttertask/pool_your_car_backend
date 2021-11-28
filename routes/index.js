@@ -106,6 +106,7 @@ var authenticateToken = function (req, res, next) {
     next(req, res);
   });
 };
+
 // User Logout
 // router.get("/api/user/logout", function(req, res) => {
 //   router.session({}, function(err) => {
@@ -1336,7 +1337,7 @@ router.post("/api/admin/login", (req, res) => {
 });
 
 //Block User
-router.post(authenticateToken, "/api/admin/blockuser", (req, res) => {
+router.post("/api/admin/blockuser", authenticateToken, (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
@@ -1353,7 +1354,7 @@ router.post(authenticateToken, "/api/admin/blockuser", (req, res) => {
 });
 
 //Unblock User
-router.post(authenticateToken, "/api/admin/unblockuser", (req, res) => {
+router.post("/api/admin/unblockuser", authenticateToken, (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
