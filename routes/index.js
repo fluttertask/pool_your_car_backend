@@ -1289,7 +1289,7 @@ Admin.findOne(
   },
   function (err, result) {
     if (!result) {
-      User.create(newuser)
+      User.create(admin)
         .then(
           (user) => {
             console.log("User has been Added ", user);
