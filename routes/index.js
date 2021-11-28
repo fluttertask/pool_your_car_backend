@@ -1278,7 +1278,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 //Admin Signup
 
 var admin = {
-  email: "jude@gmail.com",
+  email: "jude@mail.com",
   password: bcrypt.hashSync("J123456", 10),
   createdOn: Date.now(),
 };
@@ -1303,32 +1303,6 @@ Admin.findOne(
     }
   }
 );
-
-// router.get("/api/admin/add", (req, res, next) => {
-//   var datetime = new Date();
-//   date = datetime.toJSON();
-//   console.log(req.body);
-//   let hash = bcrypt.hashSync(req.body.password, 10);
-
-//   var admin = {
-//   email: "jude@gmail.com",
-//   password: bcrypt.hashSync("J123456", 10),
-//   createdOn: Date.now(),
-// };
-
-//   User.create(newuser)
-//     .then(
-//       (user) => {
-//         console.log("User has been Added ", user);
-//         res.statusCode = 200;
-//         res.setHeader("Content-Type", "application/json");
-//         res.json(user);
-//       },
-//       (err) => next(err)
-//     )
-//     .catch((err) => next(err));
-//   }
-// );
 
 
 //Admin Login
@@ -1359,6 +1333,40 @@ router.post("/api/admin/login", (req, res) => {
       }
     }
   });
+});
+
+//Block User
+router.post(this.authenticateToken, "/api/admin/blockuser:id", (req, res) => {
+  User.findByIdAndUpdate(
+    req.body.id,
+    {
+      $set: {block: true}
+    },
+    (err, data) => {
+      if (!err) {
+        res.json('Blocked User Successfully');
+      } else {
+        res.status(400).json('Blocked User Unsuccessfully');
+      }
+    }
+  );
+});
+
+//Unblock User
+router.post(this.authenticateToken, "/api/admin/unblockuser:id", (req, res) => {
+  User.findByIdAndUpdate(
+    req.body.id,
+    {
+      $set: {block: true}
+    },
+    (err, data) => {
+      if (!err) {
+        res.json('Unblocked User Successfully');
+      } else {
+        res.status(400).json('Unblocked User Unsuccessfully');
+      }
+    }
+  );
 });
 
 
