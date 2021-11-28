@@ -1269,4 +1269,67 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 });
 
 
+
+
+
+// ADMIN API
+
+//Admin Signup
+router.post("/api/admin/add", (req, res, next) => {
+  var datetime = new Date();
+  date = datetime.toJSON();
+  console.log(req.body);
+  let hash = bcrypt.hashSync(req.body.password, 10);
+
+  var newuser = {
+    email: req.body.email,
+    password: hash,
+    created: Date.now(),
+  };
+
+  User.create(newuser)
+    .then(
+      (user) => {
+        console.log("User has been Added ", user);
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.json(user);
+      },
+      (err) => next(err)
+    )
+    .catch((err) => next(err));
+  }
+);
+
+
+//Admin Login
+router.post("/api/admin/login", (req, res) => {
+  Admin.findOne({ email: req.body.email }, (err, admin) => {
+    console.log("my email" + admin);
+    if (admin == null) {
+      res.status(400).json("Invalid email ");
+    } else {
+      if (user && bcrypt.compareSync(req.body.password, admin.password)) {
+        console.log(user);
+        const accessToken = jwt.sign(
+          {
+            email: admin.email,
+          },
+          ACCESS_TOKEN_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        );
+        let response = {};
+        response.accessToken = accessToken;
+        response.user = admin;
+        res.status(200).json(response);
+      } else {
+        res.status(400).json("Invalid password");
+      }
+    }
+  });
+});
+
+
 module.exports = router;

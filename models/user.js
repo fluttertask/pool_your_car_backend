@@ -83,6 +83,10 @@ const User = mongoose.model("User", {
     type: mongoose.Schema.ObjectId,
     ref: "Wallet",
   },
+  blocked: {
+    type: Boolean,
+    default: false
+  },
   offeredride: [
     {
       type: mongoose.Schema.ObjectId,
