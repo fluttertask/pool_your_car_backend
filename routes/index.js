@@ -1339,7 +1339,7 @@ router.post("/api/admin/login", (req, res) => {
     if (admin == null) {
       res.status(400).json("Invalid email ");
     } else {
-      if (user && bcrypt.compareSync(req.body.password, admin.password)) {
+      if (admin && bcrypt.compareSync(req.body.password, admin.password)) {
         console.log(admin);
         const accessToken = jwt.sign(
           {
