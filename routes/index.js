@@ -1336,7 +1336,7 @@ router.post("/api/admin/login", (req, res) => {
 });
 
 //Block User
-router.post(this.authenticateToken, "/api/admin/blockuser:id", (req, res) => {
+router.post(this.authenticateToken, "/api/admin/blockuser", (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
@@ -1353,7 +1353,7 @@ router.post(this.authenticateToken, "/api/admin/blockuser:id", (req, res) => {
 });
 
 //Unblock User
-router.post(this.authenticateToken, "/api/admin/unblockuser:id", (req, res) => {
+router.post(this.authenticateToken, "/api/admin/unblockuser", (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
