@@ -95,7 +95,7 @@ router.post("/api/user/login", (req, res) => {
 var authenticateToken = function (req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
-  console.log(token);
+  console.log(authHeader);
   if (token == null) {
     return res.status(401).json("Access Token Not Found");
   }
