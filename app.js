@@ -53,7 +53,6 @@ io.on('connection', function (client) {
 
   client.on('disconnect', function () {
     console.log('client disconnect...', client.id)
-    // handleDisconnect()
   })
 
   client.on('error', function (err) {

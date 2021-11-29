@@ -84,8 +84,8 @@ const User = mongoose.model("User", {
     ref: "Wallet",
   },
   blocked: {
-    type: Boolean,
-    default: false
+    type: String,
+    default: 'unblocked'
   },
   offeredride: [
     {
