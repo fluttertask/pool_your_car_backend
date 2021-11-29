@@ -104,7 +104,7 @@ var authenticateToken = function (req, res, next) {
     //   return res.status(403).json("Access Token Expired");
     // }
     // req.user = user;
-    next(req, res);
+    next();
   });
 };
 
