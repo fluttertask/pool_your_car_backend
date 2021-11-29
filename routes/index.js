@@ -1365,7 +1365,7 @@ router.post("/api/admin/blockuser", authenticateToken, (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
-      $set: {block: 'blocked'}
+      $set: {blocked: 'blocked'}
     },
     (err, data) => {
       if (!err) {
@@ -1382,7 +1382,7 @@ router.post("/api/admin/unblockuser", authenticateToken, (req, res) => {
   User.findByIdAndUpdate(
     req.body.id,
     {
-      $set: {block: 'unblocked'}
+      $set: {blocked: 'unblocked'}
     },
     (err, data) => {
       if (!err) {
