@@ -77,9 +77,9 @@ router.post("/api/user/login", (req, res) => {
             email: user.email,
           },
           ACCESS_TOKEN_SECRET,
-          // {
-          //   expiresIn: "1d",
-          // }
+          {
+            expiresIn: "1d",
+          }
         );
         let response = {};
         response.accessToken = accessToken;
@@ -100,10 +100,10 @@ var authenticateToken = function (req, res, next) {
     return res.status(401).json("Authentication Failed");
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json("Access Token Expired");
-    }
-    req.user = user;
+    // if (err) {
+    //   return res.status(403).json("Access Token Expired");
+    // }
+    // req.user = user;
     next(req, res);
   });
 };
