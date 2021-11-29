@@ -77,9 +77,9 @@ router.post("/api/user/login", (req, res) => {
             email: user.email,
           },
           ACCESS_TOKEN_SECRET,
-          {
-            expiresIn: "1d",
-          }
+          // {
+          //   expiresIn: "1d",
+          // }
         );
         let response = {};
         response.accessToken = accessToken;
