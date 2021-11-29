@@ -94,10 +94,10 @@ router.post("/api/user/login", (req, res) => {
 
 var authenticateToken = function (req, res, next) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader.split(" ")[1];
-  console.log(authHeader);
+  const token = authHeader && authHeader.split(" ")[1];
+  console.log(token);
   if (token == null) {
-    return res.status(401).json("Access Token Not Found");
+    return res.status(401).json("Authentication Failed");
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
@@ -838,66 +838,76 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
 
 router.post("/api/ride/bookride/:id", (req, res) => {
   console.log(req.body);
-  Ride.findByIdAndUpdate(
-    req.params.id, 
-    {
-      $push: {requestedPassengers: req.body.userId},
-    },
-    {new: true},
-    (err, data) => {
-    if (!err) {
-      // console.log(data);
+  User.findById(
+    req.body.driverId,
+    (err, result) => {
+      if (result.blocked == true){
+        res.status(200).json({
+          code: 400,
+          message: "Blocked User, Please Contact Admin",
+          updateUser: doc,
+        });
+      }else{
+        Ride.findByIdAndUpdate(
+          req.params.id, 
+          {
+            $push: {requestedPassengers: req.body.userId},
+          },
+          {new: true},
+          (err, data) => {
+          if (!err) {
 
-      if (data != null) {
-
-        User.findOneAndUpdate(
-          { _id: req.body.userId },
-          { $push: { bookedride: req.params.id } },
-          { new: true },
-          (err, doc) => {
-            if (!err) {
-              // console.log(doc);
+            if (data != null) {
               User.findOneAndUpdate(
-                { _id: data.driverId},
-                { $push: { notifications: {
-                    senderID: req.body.userId,
-                    type: 'bookrequest',
-                    from: data.pickuplocation,
-                    to: data.droplocation,
-                    ride: req.params.id,
-                    name: doc.firstname,
-                    message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
-                    read: false
-                }, } },
+                { _id: req.body.userId },
+                { $push: { bookedride: req.params.id } },
                 { new: true },
-                (err, data) => {
+                (err, doc) => {
                   if (!err) {
                     // console.log(doc);
+                    User.findOneAndUpdate(
+                      { _id: data.driverId},
+                      { $push: { notifications: {
+                          senderID: req.body.userId,
+                          type: 'bookrequest',
+                          from: data.pickuplocation,
+                          to: data.droplocation,
+                          ride: req.params.id,
+                          name: doc.firstname,
+                          message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
+                          read: false
+                      }, } },
+                      { new: true },
+                      (err, data) => {
+                        if (!err) {
+                          // console.log(doc);
+                        } else {
+                          console.log(err);
+                        }
+                      }
+                    );
                   } else {
                     console.log(err);
                   }
                 }
               );
+              res.json({
+                code: 200,
+                message: "Ride booked successfully",
+                passengers: data.passengersID,
+              });
             } else {
-              console.log(err);
+              res.json({
+                code: 200,
+                message: "Ride not found",
+              });
             }
+          } else {
+            console.log(err);
           }
-        );
-        res.json({
-          code: 200,
-          message: "Ride booked successfully",
-          passengers: data.passengersID,
-        });
-      } else {
-        res.json({
-          code: 200,
-          message: "Ride not found",
         });
       }
-    } else {
-      console.log(err);
-    }
-  });
+    });
 });
 
 
