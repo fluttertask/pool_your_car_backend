@@ -19,6 +19,9 @@ const Admin = mongoose.model("Admin", {
   },
   lastLogin: {
     type: String,
+  },
+  totalAmount: {
+    type: String
   }
 });
 

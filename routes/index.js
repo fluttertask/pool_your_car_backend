@@ -3,6 +3,7 @@ const path = require("path");
 const { Ride } = require("../models/ride");
 const { User } = require("../models/user");
 const { Admin } = require("../models/admin");
+const { Wallet } = require("../models/wallet");
 const users_collection = "users";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -14,6 +15,7 @@ const { appendFile } = require("fs");
 const DIR = "./public/images";
 var dateFormat = require("dateformat");
 const { json } = require("body-parser");
+const { Wallet } = require("../models/wallet");
 var now = new Date();
 
 var ACCESS_TOKEN_SECRET =
@@ -239,6 +241,19 @@ router.post("/api/user/add", (req, res, next) => {
           .then(
             (user) => {
               console.log("User has been Added ", user);
+
+              Wallet.create({
+                uniqueId: req.body.phonenumber,
+                userId: user._id,
+              })
+              .then(
+                (user) => {
+                  console.log("Wallet has been created ", user);
+                },
+                (err) => next(err)
+              )
+              .catch((err) => next(err));
+
               res.statusCode = 200;
               res.setHeader("Content-Type", "application/json");
               res.json(user);
@@ -766,6 +781,31 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
           code: 200,
           message: "Ride Accepted"
         });
+
+        Wallet.findOneAndUpdate(
+          {userId: passengerID},
+          {$inc: {amount: -(req.body.amountSent*0.2)}},
+          (err, result) => {
+            if (!err) {
+              console.log('updating wallet');
+            }else{
+              console.log('Error updating wallet');
+            }
+          }
+        );
+
+        Admin.findOneAndUpdate(
+          {},
+          {$inc: {amount: +(req.body.amountSent*0.2)}},
+          () => {
+            if (!err) {
+              console.log('updating admin');
+            }else{
+              console.log('Error updating admin');
+            }
+          }
+        );
+        
         User.findByIdAndUpdate(
           req.body.userId,
           {
@@ -783,7 +823,8 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
               console.log(doc)
             }
           }
-        )
+        );
+        
       }
     }
   )
@@ -791,10 +832,9 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
 
 //Reject ride request from the passenger by the Driver
 
-router.post('/api/ride/rejectbookedride', (req, res)=>{
+router.post('/api/ride/rejectbookedride', (req, res) => {
   Ride.findByIdAndUpdate(
     req.body.rideId,
-    
     {
       $pull: {requestedPassengers: req.body.passengerID},
     },
@@ -803,7 +843,7 @@ router.post('/api/ride/rejectbookedride', (req, res)=>{
         console.log(err);
         res.json({
           code: 200,
-          message: "Error In Rejecting Ride"
+          message: "Error In Rejecting Ride",
         })
       }else{
         console.log(ride);
@@ -941,12 +981,66 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               console.log(err);
             }
           }
-        ),
-          res.json({
-            code: 200,
-            message: "Ride has been cancelled successfully",
-            deleteRide: data,
-          });
+        );
+
+        if ((Date.now().to - (Date.parse(data.date).toExponential + Date.parse(data.time).toExponential)) > 99) {
+
+          Wallet.findOneAndUpdate(
+            {userId: req.body.userId},
+            {$inc: {amount: +(req.body.amountSent*0.2)}},
+            (err, result) => {
+              if (!err) {
+                console.log('updating wallet');
+              } else {
+                console.log('Error updating wallet');
+              }
+            }
+
+          );
+
+          Admin.findOneAndUpdate(
+            {},
+            {$inc: {amount: -(req.body.amountSent*0.2)}},
+            () => {
+              if (!err) {
+                console.log('updating admin');
+              }else{
+                console.log('Error updating admin');
+              }
+            }
+          );
+        }else {
+
+          Wallet.findOneAndUpdate(
+            {userId: passengerID},
+            {$inc: {amount: +(req.body.amountSent*0.2)}},
+            (err, result) => {
+              if (!err) {
+                console.log('updating wallet');
+              }else{
+                console.log('Error updating wallet');
+              }
+            }
+          );
+
+          Admin.findOneAndUpdate(
+            {},
+            {$inc: {amount: -(req.body.amountSent*0.2)}},
+            () => {
+              if (!err) {
+                console.log('updating admin');
+              }else{
+                console.log('Error updating admin');
+              }
+            }
+          );
+        }
+
+        res.json({
+          code: 200,
+          message: "Ride has been cancelled successfully",
+          deleteRide: data,
+        });
       } else {
         Ride.findByIdAndUpdate(
           req.params.id, 
@@ -1105,7 +1199,7 @@ router.post('/api/ride/cancelstartride', (req, res)=>{
               console.log(err);
             }
           }
-        )
+        );
         User.findByIdAndUpdate(
           req.body.userId,
           {
@@ -1274,17 +1368,53 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
             (err, doc) => {
               if (!err) {
                 console.log(doc);
+                Wallet.findOneAndUpdate(
+                  {userId: id},
+                  {$inc: {amount: -(req.body.amountSent*0.8)}},
+                  (err, result) => {
+                    if (!err) {
+                      // console.log('updating wallet');
+                    }else{
+                      console.log('Error updating wallet');
+                    }
+                  }
+                );
               } else {
                 console.log(err);
               }
             }
           );
         });
-          res.json({
-            code: 200,
-            message: "Ride has ended successfully",
-            deleteRide: data,
-          });
+
+        Wallet.findOneAndUpdate(
+          {userId: req.body.userId},
+          {$inc: {amount: +(req.body.amountSent*0.8 * data.passengersID.length)}},
+          (err, result) => {
+            if (!err) {
+              console.log('updating wallet');
+            }else{
+              console.log('Error updating wallet');
+            }
+          }
+        );
+
+        // Admin.findOneAndUpdate(
+        //   {},
+        //   {$inc: {amount: +(req.body.amountSent*0.2)}},
+        //   () => {
+        //     if (!err) {
+        //       console.log('updating admin');
+        //     }else{
+        //       console.log('Error updating admin');
+        //     }
+        //   }
+        // );
+        
+        res.json({
+          code: 200,
+          message: "Ride has ended successfully",
+          deleteRide: data,
+        });
 
         
       }
@@ -1294,7 +1424,70 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
   });
 });
 
+// PAYMENT
 
+//payment 
+
+
+router.post('/api/payment/getwalletdetails', (req, res) => {
+  Wallet.findOne(
+    {userId: req.body.userId},
+    (err, result) => {
+      if (!err){
+        res.json(result);
+      }else{
+        res.status(400).json('Error getting wallet');
+      }
+    }
+  )
+});
+
+router.post('/api/payment/sendCredits', (req, res) => {
+
+  Wallet.findOne(
+    {userId: req.body.userId},
+    (err, userResult) => {
+      if (!err){
+        if (userResult.amount > req.body.amount){
+          Wallet.findOneAndUpdate(
+            {userId: req.body.userId},
+            {
+              $inc: {amount: -req.body.amountSent}
+            },
+            (err, result) => {
+              if (!err){
+                Wallet.findOneAndUpdate(
+                  {uniqueId: req.body.receiverId},
+                  {
+                    $inc: {amount: +req.body.amountSent}
+                  },
+                  (err, result) => {
+                    if (!err){
+                      res.json(result);
+                    }else{
+                      Payment.create({
+                        from: userResult._id,
+                        to: result._id,
+                        amount: req.body.amountSent
+                      }).then((err, payment) => {
+                        console.log('Payment created');
+                      })
+                      res.status(400).json("Error adding to balance");
+                    }
+                  }
+                )
+              }else{
+                res.status(400).json("Error deducing to balance");
+              }
+            }
+          )
+        }
+      }else{
+        res.status(400).json("Balance is not available");
+      }
+    }
+  )
+});
 
 
 
@@ -1318,9 +1511,6 @@ Admin.findOne(
         .then(
           (user) => {
             console.log("User has been Added ", user);
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json");
-            res.json(user);
           },
           (err) => next(err)
         )
@@ -1332,14 +1522,12 @@ Admin.findOne(
 
 //Admin Login
 router.post("/api/admin/login", (req, res) => {
-  console.log(req.body.email);
   Admin.findOne({ email: req.body.email}, (err, admin) => {
     console.log("my email" + admin);
     if (admin == null) {
-      res.status(400).json("Invalid email ");
+      res.status(400).json("Invalid email");
     } else {
       if (admin && bcrypt.compareSync(req.body.password, admin.password)) {
-        console.log(admin);
         const accessToken = jwt.sign(
           {
             email: admin.email,

@@ -51,7 +51,6 @@ const Ride = mongoose.model("Ride", {
       ref: "User",
     },
   ],
-
   cartype: {
     type: String,
     required: true,
@@ -59,6 +58,11 @@ const Ride = mongoose.model("Ride", {
   vehicle_registration_number: {
     type: String,
     required: true,
+  },
+
+  wallet: {
+    type: mongoose.Schema.ObjectId,
+    ref: "wallet"
   },
 
   optional_details: {

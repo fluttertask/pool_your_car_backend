@@ -27,9 +27,9 @@ const { Socket } = require("socket.io");
 app.use("/", myroute);
 
 app.use("/", require("./routes/index"));
-app.use(express.static('public'))
+app.use(express.static('public'));
 
-var PORT = process.env.PORT || 3000
+var PORT = process.env.PORT || 3000;
 
 server = app.listen(PORT);
 const io = require("socket.io")(server);
@@ -39,25 +39,25 @@ io.on('connection', function (client) {
 
   client.on('typing', function name(data) {
     console.log(data);
-    io.emit('typing', data)
-  })
+    io.emit('typing', data);
+  });
 
   client.on('message', function name(data) {
     console.log(data);
-    io.emit('message', data)
-  })
+    io.emit('message', data);
+  });
 
   
   client.on('connect', function () {
-  })
+  });
 
   client.on('disconnect', function () {
-    console.log('client disconnect...', client.id)
-  })
+    console.log('client disconnect...', client.id);
+  });
 
   client.on('error', function (err) {
-    console.log('received error from client:', client.id)
-    console.log(err)
-  })
+    console.log('received error from client:', client.id);
+    console.log(err);
+  });
 })
 
