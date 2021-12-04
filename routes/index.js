@@ -983,10 +983,16 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
           }
         );
 
-        if ((Date.now().to - (Date.parse(data.date).toExponential + Date.parse(data.time).toExponential)) > 99) {
+        const d = new Date(data.date + ' ' + data.time);
+        const n = new Date();
+
+        var last = ((((d.getFullYear() * 12) + d.getMonth()) * 30) + d.getDate()) * 24;
+        var now = ((((n.getFullYear() * 12) + n.getMonth()) * 30) + n.getDate()) * 24;
+
+        if ((now - last) < 6) {
 
           Wallet.findOneAndUpdate(
-            {userId: req.body.userId},
+            {userId: data.driverId},
             {$inc: {amount: +(req.body.amountSent*0.2)}},
             (err, result) => {
               if (!err) {
@@ -1012,7 +1018,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
         }else {
 
           Wallet.findOneAndUpdate(
-            {userId: passengerID},
+            {userId: req.body.userId},
             {$inc: {amount: +(req.body.amountSent*0.2)}},
             (err, result) => {
               if (!err) {
@@ -1243,7 +1249,7 @@ router.post("/api/ride/startride", (req, res) => {
             code: 200,
             state: true,
             message: "All user accepted proceed to ride",
-          });
+          });text
         }else{
           data.passengersID.forEach((id) => {
             if (!data.readyPassengersID.includes(id)){
