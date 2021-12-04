@@ -1016,7 +1016,6 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
             }
           );
         }else {
-
           Wallet.findOneAndUpdate(
             {userId: req.body.userId},
             {$inc: {amount: +(req.body.amountSent*0.2)}},
