@@ -9,12 +9,12 @@ const Wallet = mongoose.model("Wallet", {
     default: 0,
   },
 
-  uniqueID: {
+  uniqueId: {
     type: Number,
     require: true,
   },
 
-  userID: {
+  userId: {
     type: mongoose.Schema.ObjectId,
     ref: "user",
   },
