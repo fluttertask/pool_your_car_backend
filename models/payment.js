@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 //Wallet Schema
 
-const Payment = mongoose.model("Wallet", {
+const Payment = mongoose.model("Payment", {
     from: {
         type: mongoose.Schema.ObjectId,
         ref: "wallet",

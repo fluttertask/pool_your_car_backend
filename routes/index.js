@@ -4,6 +4,7 @@ const { Ride } = require("../models/ride");
 const { User } = require("../models/user");
 const { Admin } = require("../models/admin");
 const { Wallet } = require("../models/wallet");
+const { Payment } = require("../models/payment");
 const users_collection = "users";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -15,7 +16,6 @@ const { appendFile } = require("fs");
 const DIR = "./public/images";
 var dateFormat = require("dateformat");
 const { json } = require("body-parser");
-const { Wallet } = require("../models/wallet");
 var now = new Date();
 
 var ACCESS_TOKEN_SECRET =
