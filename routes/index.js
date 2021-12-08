@@ -1453,7 +1453,7 @@ router.post('/api/payment/sendCredits', (req, res) => {
     {userId: req.body.userId},
     (err, userResult) => {
       if (!err){
-        if (userResult.amount > req.body.amount){
+        if (userResult.amount > req.body.amount) {
           Wallet.findOneAndUpdate(
             {userId: req.body.userId},
             {
