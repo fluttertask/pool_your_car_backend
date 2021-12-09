@@ -1447,8 +1447,9 @@ router.post('/api/payment/getwalletdetails', (req, res) => {
   )
 });
 
-router.post('/api/payment/sendCredits', (req, res) => {
+router.post('/api/users/sendCredits', (req, res) => {
   console.log('we rule the world');
+  console.log(req.body.userId);
   Wallet.findOne(
     {userId: req.body.userId},
     (err, userResult) => {
@@ -1585,6 +1586,40 @@ router.post("/api/admin/unblockuser", authenticateToken, (req, res) => {
       }
     }
   );
+});
+
+router.post('/api/payment/sendCredits', (req, res) => {
+  console.log('we rule the world');
+  console.log(req.body.receiverId);
+  Wallet.findOne(
+    {uniqueId: req.body.receiverId},
+    (err, userResult) => {
+      if (!err){
+        Wallet.findOneAndUpdate(
+          {uniqueId: req.body.receiverId},
+          {
+            $inc: {amount: +req.body.amountSent}
+          },
+          (err, result) => {
+            if (!err){
+              res.json(result);
+            }else{
+              Payment.create({
+                from: userResult._id,
+                to: result._id,
+                amount: req.body.amountSent
+              }).then((err, payment) => {
+                console.log('Payment created');
+              })
+              res.status(400).json("Error adding to balance");
+            }
+          }
+        )
+      }else{
+        res.status(400).json("Balance is not available");
+      }
+    }
+  )
 });
 
 
