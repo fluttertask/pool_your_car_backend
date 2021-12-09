@@ -1448,7 +1448,7 @@ router.post('/api/payment/getwalletdetails', (req, res) => {
 });
 
 router.post('/api/payment/sendCredits', (req, res) => {
-
+  console.log('we rule the world');
   Wallet.findOne(
     {userId: req.body.userId},
     (err, userResult) => {
