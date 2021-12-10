@@ -1598,7 +1598,7 @@ router.post('/api/payment/sendCredits', (req, res) => {
         Wallet.findOneAndUpdate(
           {uniqueId: req.body.receiverId},
           {
-            $inc: {amount: +req.body.amountSent}
+            $inc: {balance: +req.body.amountSent}
           },
           (err, result) => {
             if (!err){
