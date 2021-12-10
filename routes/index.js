@@ -211,56 +211,59 @@ router.post("/api/user/add", (req, res, next) => {
           res
             .status(400)
             .json("Email " + req.body.email + '" is already taken');
-        }
-      }
-    );
-    User.findOne(
-      {
-        phonenumber: req.body.phonenumber,
-      },
-
-      function (err, result) {
-        if (result) {
-          res
-            .status(400)
-            .json(
-              "Phone number " + req.body.phonenumber + '" is already taken'
-            );
-        }
-
-        var newuser = {
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          phonenumber: req.body.phonenumber,
-          email: req.body.email,
-          password: hash,
-          confirmpassword: hash,
-          createdat: date,
-        };
-        User.create(newuser)
-          .then(
-            (user) => {
-              console.log("User has been Added ", user);
-
-              Wallet.create({
-                uniqueId: req.body.phonenumber,
-                userId: user._id,
-              })
-              .then(
-                (user) => {
-                  console.log("Wallet has been created ", user);
-                },
-                (err) => next(err)
-              )
-              .catch((err) => next(err));
-
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.json(user);
+        }else{
+          User.findOne(
+            {
+              phonenumber: req.body.phonenumber,
             },
-            (err) => next(err)
-          )
-          .catch((err) => next(err));
+      
+            function (err, result) {
+              if (result) {
+                res
+                  .status(400)
+                  .json(
+                    "Phone number " + req.body.phonenumber + '" is already taken'
+                  );
+              }else{
+                var newuser = {
+                firstname: req.body.firstname,
+                lastname: req.body.lastname,
+                phonenumber: req.body.phonenumber,
+                email: req.body.email,
+                password: hash,
+                confirmpassword: hash,
+                createdat: date,
+              };
+              User.create(newuser)
+                .then(
+                  (user) => {
+                    console.log("User has been Added ", user);
+      
+                    Wallet.create({
+                      uniqueId: req.body.phonenumber,
+                      userId: user._id,
+                    })
+                    .then(
+                      (user) => {
+                        console.log("Wallet has been created ", user);
+                      },
+                      (err) => next(err)
+                    )
+                    .catch((err) => next(err));
+      
+                    res.statusCode = 200;
+                    res.setHeader("Content-Type", "application/json");
+                    res.json(user);
+                  },
+                  (err) => next(err)
+                )
+                .catch((err) => next(err));
+              }
+      
+              
+            }
+          );
+        }
       }
     );
   } else {
@@ -881,6 +884,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
   User.findById(
     req.body.driverId,
     (err, result) => {
+      console.log(result);
       if (result.blocked == 'blocked'){
         res.status(200).json({
           code: 400,
