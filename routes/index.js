@@ -1448,8 +1448,6 @@ router.post('/api/payment/getwalletdetails', (req, res) => {
 });
 
 router.post('/api/user/sendCredits', (req, res) => {
-  console.log('we rule the world');
-  console.log(req.body.userId);
   Wallet.findOne(
     {userId: req.body.userId},
     (err, userResult) => {
@@ -1461,8 +1459,6 @@ router.post('/api/user/sendCredits', (req, res) => {
               $inc: {balance: -req.body.amountSent}
             },
             (err, resultNew) => {
-              console.log(userResult.balance);
-              console.log(req.body.amountSent)
               if (!err){
                 Wallet.findOneAndUpdate(
                   {uniqueId: req.body.receiverId},
@@ -1493,7 +1489,7 @@ router.post('/api/user/sendCredits', (req, res) => {
           res.status(400).json("Insufficient Balance");
         }
       }else{
-        res.status(400).json("Error Account not available");
+        res.status(400).json("Invalid Data");
       }
     }
   )
