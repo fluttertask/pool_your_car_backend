@@ -1487,9 +1487,11 @@ router.post('/api/user/sendCredits', (req, res) => {
               }
             }
           )
+        }else{
+          res.status(400).json("Balance is not available");
         }
       }else{
-        res.status(400).json("Balance is not available");
+        res.status(400).json("Error Account not available");
       }
     }
   )
