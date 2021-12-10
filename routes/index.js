@@ -1454,7 +1454,7 @@ router.post('/api/user/sendCredits', (req, res) => {
     {userId: req.body.userId},
     (err, userResult) => {
       if (!err){
-        if (userResult.amount > req.body.amount) {
+        if (userResult.balance > req.body.amountSent) {
           Wallet.findOneAndUpdate(
             {userId: req.body.userId},
             {
@@ -1488,7 +1488,7 @@ router.post('/api/user/sendCredits', (req, res) => {
             }
           )
         }else{
-          res.status(400).json("Balance is not available");
+          res.status(400).json("Insufficient Balance");
         }
       }else{
         res.status(400).json("Error Account not available");
