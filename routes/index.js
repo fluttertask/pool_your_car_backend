@@ -383,7 +383,7 @@ router.post("/api/ride/add", (req, res, next) => {
   User.findById(
     req.body.driverId,
     (err, result) => {
-      if (result.blocked == true){
+      if (result.blocked == 'blocked'){
         res.status(200).json({
           code: 400,
           message: "Blocked User, Please Contact Admin",
@@ -881,7 +881,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
   User.findById(
     req.body.driverId,
     (err, result) => {
-      if (result.blocked == true){
+      if (result.blocked == 'blocked'){
         res.status(200).json({
           code: 400,
           message: "Blocked User, Please Contact Admin",
@@ -1447,7 +1447,7 @@ router.post('/api/payment/getwalletdetails', (req, res) => {
   )
 });
 
-router.post('/api/users/sendCredits', (req, res) => {
+router.post('/api/user/sendCredits', (req, res) => {
   console.log('we rule the world');
   console.log(req.body.userId);
   Wallet.findOne(
