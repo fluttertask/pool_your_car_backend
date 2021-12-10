@@ -882,8 +882,9 @@ router.post('/api/ride/rejectbookedride', (req, res) => {
 router.post("/api/ride/bookride/:id", (req, res) => {
   console.log(req.body);
   User.findById(
-    req.body.driverId,
+    req.body.userId,
     (err, result) => {
+      if (err) return console.log(err);
       console.log(result);
       if (result.blocked == 'blocked'){
         res.status(200).json({
