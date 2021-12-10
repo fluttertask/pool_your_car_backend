@@ -1458,18 +1458,18 @@ router.post('/api/user/sendCredits', (req, res) => {
           Wallet.findOneAndUpdate(
             {userId: req.body.userId},
             {
-              $inc: {amount: -req.body.amountSent}
+              $inc: {balance: -req.body.amountSent}
             },
-            (err, result) => {
+            (err, resultNew) => {
               if (!err){
                 Wallet.findOneAndUpdate(
                   {uniqueId: req.body.receiverId},
                   {
-                    $inc: {amount: +req.body.amountSent}
+                    $inc: {balance: +req.body.amountSent}
                   },
                   (err, result) => {
                     if (!err){
-                      res.json(result);
+                      res.json(resultNew);
                     }else{
                       Payment.create({
                         from: userResult._id,
