@@ -1520,6 +1520,25 @@ router.post('/api/user/sendCredits', (req, res) => {
   )
 });
 
+router.post('/api/payment/getministatements', (req, res) => {
+  Payment.find(
+    {
+      $or: [
+        {from: req.body.userId},
+        {to: req.body.userId}
+      ]
+    },
+    (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(403);
+      }else{
+        res.status(200).json(data);
+      }
+    }
+  )
+})
+
 
 
 // ADMIN API
