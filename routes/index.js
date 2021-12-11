@@ -889,7 +889,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
       if (result.blocked == 'blocked'){
         res.status(400).json("Blocked User, Please Contact Admin");
       }else{
-        Wallet.find(
+        Wallet.findOne(
           {userId: req.body.userId},
           (err, wallet) => {
             if (err) return console.error(err);
@@ -909,7 +909,9 @@ router.post("/api/ride/bookride/:id", (req, res) => {
                       if (data != null) {
                         User.findOneAndUpdate(
                           { _id: req.body.userId },
-                          { $push: { bookedride: req.params.id } },
+                          { 
+                            $push: { bookedride: req.params.id } ,
+                          },
                           { new: true },
                           (err, doc) => {
                             if (!err) {
@@ -941,6 +943,20 @@ router.post("/api/ride/bookride/:id", (req, res) => {
                           }
                         );
                         res.json("Ride booked successfully");
+                        Wallet.findOneAndUpdate(
+                          {userId: req.body.userId},
+                          {
+                            $inc: {balance: -(ride.ridefare/5)}
+                          },
+                          (err, wallet) => {
+                        });
+                        Admin.findOneAndUpdate(
+                          {},
+                          {
+                            $inc: {totalAmount: (ride.ridefare/5)}
+                          },
+                          (err, wallet) => {
+                        });
                       } else {
                         res.status(400).json("Ride not found");
                       }
