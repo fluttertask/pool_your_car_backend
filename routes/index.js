@@ -887,70 +887,74 @@ router.post("/api/ride/bookride/:id", (req, res) => {
       if (err) return console.log(err);
       console.log(result);
       if (result.blocked == 'blocked'){
-        res.status(200).json({
-          code: 400,
-          message: "Blocked User, Please Contact Admin",
-          updateUser: doc,
-        });
+        res.status(400).json("Blocked User, Please Contact Admin");
       }else{
-        Ride.findByIdAndUpdate(
-          req.params.id, 
-          {
-            $push: {requestedPassengers: req.body.userId},
-          },
-          {new: true},
-          (err, data) => {
-          if (!err) {
-
-            if (data != null) {
-              User.findOneAndUpdate(
-                { _id: req.body.userId },
-                { $push: { bookedride: req.params.id } },
-                { new: true },
-                (err, doc) => {
-                  if (!err) {
-                    // console.log(doc);
-                    User.findOneAndUpdate(
-                      { _id: data.driverId},
-                      { $push: { notifications: {
-                          senderID: req.body.userId,
-                          type: 'bookrequest',
-                          from: data.pickuplocation,
-                          to: data.droplocation,
-                          ride: req.params.id,
-                          name: doc.firstname,
-                          message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
-                          read: false
-                      }, } },
-                      { new: true },
-                      (err, data) => {
-                        if (!err) {
-                          // console.log(doc);
-                        } else {
-                          console.log(err);
-                        }
+        Wallet.find(
+          {userId: req.body.userId},
+          (err, wallet) => {
+            if (err) return console.error(err);
+            Ride.findById(
+              req.params.id,
+              (err, ride) => {
+                if (wallet.balance > ride.ridefare){
+                  Ride.findByIdAndUpdate(
+                    req.params.id, 
+                    {
+                      $push: {requestedPassengers: req.body.userId},
+                    },
+                    {new: true},
+                    (err, data) => {
+                    if (!err) {
+          
+                      if (data != null) {
+                        User.findOneAndUpdate(
+                          { _id: req.body.userId },
+                          { $push: { bookedride: req.params.id } },
+                          { new: true },
+                          (err, doc) => {
+                            if (!err) {
+                              // console.log(doc);
+                              User.findOneAndUpdate(
+                                { _id: data.driverId},
+                                { $push: { notifications: {
+                                    senderID: req.body.userId,
+                                    type: 'bookrequest',
+                                    from: data.pickuplocation,
+                                    to: data.droplocation,
+                                    ride: req.params.id,
+                                    name: doc.firstname,
+                                    message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
+                                    read: false
+                                }, } },
+                                { new: true },
+                                (err, data) => {
+                                  if (!err) {
+                                    // console.log(doc);
+                                  } else {
+                                    console.log(err);
+                                  }
+                                }
+                              );
+                            } else {
+                              console.log(err);
+                            }
+                          }
+                        );
+                        res.json("Ride booked successfully");
+                      } else {
+                        res.status(400).json("Ride not found");
                       }
-                    );
-                  } else {
-                    console.log(err);
-                  }
+                    } else {
+                      console.log(err);
+                    }
+                  });
+                }else{
+                  res.status(400).json("Insufficient Fund");
                 }
-              );
-              res.json({
-                code: 200,
-                message: "Ride booked successfully",
-                passengers: data.passengersID,
-              });
-            } else {
-              res.json({
-                code: 200,
-                message: "Ride not found",
-              });
-            }
-          } else {
-            console.log(err);
+              }
+            )
           }
-        });
+        )
       }
     });
 });
