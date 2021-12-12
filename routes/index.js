@@ -1493,18 +1493,29 @@ router.post('/api/user/sendCredits', (req, res) => {
                   (err, result) => {
                     if (!err){
                       res.json(resultNew);
-                      Payment.create({
-                        toname: result.firstname+" "+result.lastname,
-                        fromname: userResult.firstname+" "+userResult.lastname,
-                        from: userResult.phonenumber,
-                        to: result.phonenumber,
-                        fromid: userResult._id,
-                        toid: result._id,
-                        date: new Date(),
-                        amount: req.body.amountSent
-                      }).then((err, payment) => {
-                        console.log('Payment created');
-                      })
+                      User.findOne(
+                        {phonenumber: req.body.userId},
+                        (err, sender) => {
+                          User.findOne(
+                            {phonenumber: req.body.receiverId},
+                            (err, reciever) => {
+                              Payment.create({
+                                toname: reciever.firstname+" "+reciever.lastname,
+                                fromname: sender.firstname+" "+sender.lastname,
+                                from: sender.phonenumber,
+                                to: reciever.phonenumber,
+                                fromid: sender._id,
+                                toid: reciever._id,
+                                date: new Date(),
+                                amount: req.body.amountSent
+                              }).then((err, payment) => {
+                                console.log('Payment created');
+                              })
+                            }
+                          );
+                        }
+                      );
+                      
                     }else{
                       res.status(400).json("Error adding to balance");
                     }
