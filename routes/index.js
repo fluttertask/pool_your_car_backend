@@ -1677,24 +1677,29 @@ router.post('/api/admin/sendCredits', (req, res) => {
             if (!err){
               res.json(result);
               console.log(req.body.receiverId);
-              User.findOne(
-                {phonenumber: req.body.receiverId},
-                (err, user) => {
-                  if (err) return console.error(err);
-                  console.log(user);
-                  Payment.create({
-                    toname: user.firstname+" "+user.lastname,
-                    fromname: "Admin",
-                    from: "000000001",
-                    to: user.phonenumber,
-                    fromid: 0000000000,
-                    toid: user._id,
-                    date: Date(),
-                    amount: req.body.amountSent
-                  }).then((err, payment) => {
-                    console.log('Payment created');
-                  })
-                });
+              Admin.findById(
+                {},
+                (err, adminn) => {
+                  User.findOne(
+                    {phonenumber: req.body.receiverId},
+                    (err, reciever) => {
+                      if (err) return console.error(err);
+                      console.log(reciever);
+                      Payment.create({
+                        toname: reciever.firstname+" "+reciever.lastname,
+                        fromname: "Admin",
+                        from: "000000001",
+                        to: reciever.phonenumber,
+                        fromid: adminn._id,
+                        toid: reciever._id,
+                        date: Date(),
+                        amount: req.body.amountSent
+                      }).then((err, payment) => {
+                        console.log('Payment created');
+                      })
+                    });
+                }
+              );
             }else{
               res.status(400).json("Error adding to balance");
             }
