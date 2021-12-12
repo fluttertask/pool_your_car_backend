@@ -786,28 +786,30 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
         });
 
         Wallet.findOneAndUpdate(
-          {userId: passengerID},
-          {$inc: {amount: -(req.body.amountSent*0.2)}},
-          (err, result) => {
-            if (!err) {
-              console.log('updating wallet');
-            }else{
-              console.log('Error updating wallet');
-            }
-          }
-        );
-
-        Admin.findOneAndUpdate(
-          {},
-          {$inc: {amount: +(req.body.amountSent*0.2)}},
-          () => {
-            if (!err) {
-              console.log('updating admin');
-            }else{
-              console.log('Error updating admin');
-            }
-          }
-        );
+          {userId: req.body.passengerID},
+          {
+            $inc: {balance: -(ride.ridefare * 0.2)}
+          },
+          (err, wallet) => {
+        });
+        Wallet.findOneAndUpdate(
+          {userId: ride.driverId},
+          {
+            $inc: {balance: -(ride.ridefare * 0.2)}
+          },
+          (err, wallet) => {
+        });
+        // Admin.findOneAndUpdate(
+        //   {},
+        //   {$inc: {amount: +(req.body.amountSent*0.2)}},
+        //   () => {
+        //     if (!err) {
+        //       console.log('updating admin');
+        //     }else{
+        //       console.log('Error updating admin');
+        //     }
+        //   }
+        // );
         
         User.findByIdAndUpdate(
           req.body.userId,
@@ -943,20 +945,7 @@ router.post("/api/ride/bookride/:id", (req, res) => {
                           }
                         );
                         res.json("Ride booked successfully");
-                        Wallet.findOneAndUpdate(
-                          {userId: req.body.userId},
-                          {
-                            $inc: {balance: -(ride.ridefare/5)}
-                          },
-                          (err, wallet) => {
-                        });
-                        Admin.findOneAndUpdate(
-                          {},
-                          {
-                            $inc: {totalAmount: (ride.ridefare/5)}
-                          },
-                          (err, wallet) => {
-                        });
+                       
                       } else {
                         res.status(400).json("Ride not found");
                       }
@@ -1016,8 +1005,58 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
 
         if ((now - last) < 6) {
 
+          // Wallet.findOneAndUpdate(
+          //   {userId: data.driverId},
+          //   {$inc: {amount: +(req.body.amountSent*0.2)}},
+          //   (err, result) => {
+          //     if (!err) {
+          //       console.log('updating wallet');
+          //     } else {
+          //       console.log('Error updating wallet');
+          //     }
+          //   }
+
+          // );
+
+          // Wallet.findOneAndUpdate(
+          //   {userId: req.body.userId},
+          //   {$inc: {amount: +(req.body.amountSent*0.2)}},
+          //   (err, result) => {
+          //     if (!err) {
+          //       console.log('updating wallet');
+          //     } else {
+          //       console.log('Error updating wallet');
+          //     }
+          //   }
+
+          // );
+
+          // Admin.findOneAndUpdate(
+          //   {},
+          //   {$inc: {amount: -(req.body.amountSent*0.2)}},
+          //   () => {
+          //     if (!err) {
+          //       console.log('updating admin');
+          //     }else{
+          //       console.log('Error updating admin');
+          //     }
+          //   }
+          // );
+        }else {
           Wallet.findOneAndUpdate(
-            {userId: data.driverId},
+            {userId:  data.driverId},
+            {$inc: {amount: -(req.body.amountSent*0.2)}},
+            (err, result) => {
+              if (!err) {
+                console.log('updating wallet');
+              }else{
+                console.log('Error updating wallet');
+              }
+            }
+          );
+
+          Wallet.findOneAndUpdate(
+            {userId: req.body.userId},
             {$inc: {amount: +(req.body.amountSent*0.2)}},
             (err, result) => {
               if (!err) {
@@ -1029,41 +1068,17 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
 
           );
 
-          Admin.findOneAndUpdate(
-            {},
-            {$inc: {amount: -(req.body.amountSent*0.2)}},
-            () => {
-              if (!err) {
-                console.log('updating admin');
-              }else{
-                console.log('Error updating admin');
-              }
-            }
-          );
-        }else {
-          Wallet.findOneAndUpdate(
-            {userId: req.body.userId},
-            {$inc: {amount: +(req.body.amountSent*0.2)}},
-            (err, result) => {
-              if (!err) {
-                console.log('updating wallet');
-              }else{
-                console.log('Error updating wallet');
-              }
-            }
-          );
-
-          Admin.findOneAndUpdate(
-            {},
-            {$inc: {amount: -(req.body.amountSent*0.2)}},
-            () => {
-              if (!err) {
-                console.log('updating admin');
-              }else{
-                console.log('Error updating admin');
-              }
-            }
-          );
+        //   Admin.findOneAndUpdate(
+        //     {},
+        //     {$inc: {amount: -(req.body.amountSent*0.2)}},
+        //     () => {
+        //       if (!err) {
+        //         console.log('updating admin');
+        //       }else{
+        //         console.log('Error updating admin');
+        //       }
+        //     }
+        //   );
         }
 
         res.json({
@@ -1418,7 +1433,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 
         Wallet.findOneAndUpdate(
           {userId: req.body.userId},
-          {$inc: {amount: +(req.body.amountSent*0.8 * data.passengersID.length)}},
+          {$inc: {amount: +(req.body.amountSent*0.6 * data.passengersID.length)}},
           (err, result) => {
             if (!err) {
               console.log('updating wallet');
@@ -1428,17 +1443,17 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
           }
         );
 
-        // Admin.findOneAndUpdate(
-        //   {},
-        //   {$inc: {amount: +(req.body.amountSent*0.2)}},
-        //   () => {
-        //     if (!err) {
-        //       console.log('updating admin');
-        //     }else{
-        //       console.log('Error updating admin');
-        //     }
-        //   }
-        // );
+        Admin.findOneAndUpdate(
+          {},
+          {$inc: {amount: +(req.body.amountSent*0.2)}},
+          () => {
+            if (!err) {
+              console.log('updating admin');
+            }else{
+              console.log('Error updating admin');
+            }
+          }
+        );
         
         res.json({
           code: 200,
