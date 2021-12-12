@@ -1579,7 +1579,8 @@ router.get('/api/payment/getallministatements', authenticateToken, (req, res) =>
 var admin = {
   email: "jude@mail.com",
   password: bcrypt.hashSync("J123456", 10),
-  createdOn: Date.now(),
+  createdOn: new Date(),
+  lastLogin: new Date()
 };
 
 Admin.findOne(
@@ -1622,6 +1623,10 @@ router.post("/api/admin/login", (req, res) => {
         response.accessToken = accessToken;
         response.user = admin;
         res.status(200).json(response);
+        Admin.findOneAndUpdate(
+          { email: req.body.email},
+          {$set: {lastlogin: new Date()}},
+          (err, admin) => {});
       } else {
         res.status(400).json("Invalid password");
       }

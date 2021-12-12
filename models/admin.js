@@ -14,14 +14,14 @@ const Admin = mongoose.model("Admin", {
     type: String,
     required: true,
   },
-  createOn: {
+  createdOn: {
     type: String,
   },
   lastLogin: {
     type: String,
   },
   totalAmount: {
-    type: String
+    type: Number
   }
 });
 
