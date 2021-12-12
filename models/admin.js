@@ -21,7 +21,8 @@ const Admin = mongoose.model("Admin", {
     type: String,
   },
   totalAmount: {
-    type: Number
+    type: Number,
+    default: 0,
   }
 });
 
