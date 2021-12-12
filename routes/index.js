@@ -1677,7 +1677,7 @@ router.post('/api/admin/sendCredits', (req, res) => {
             if (!err){
               res.json(result);
               console.log(req.body.receiverId);
-              Admin.findById(
+              Admin.findOne(
                 {},
                 (err, adminn) => {
                   User.findOne(
