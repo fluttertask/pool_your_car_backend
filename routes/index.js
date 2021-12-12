@@ -1665,7 +1665,7 @@ router.post('/api/admin/sendCredits', (req, res) => {
           (err, result) => {
             if (!err){
               res.json(result);
-
+              console.log('+'+req.body.receiverId);
               User.findOne(
                 {phonenumber: '+'+req.body.receiverId},
                 (err, user) => {
