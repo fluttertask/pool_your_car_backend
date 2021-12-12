@@ -1495,8 +1495,13 @@ router.post('/api/user/sendCredits', (req, res) => {
                       res.json(resultNew);
                     }else{
                       Payment.create({
-                        from: userResult._id,
-                        to: result._id,
+                        toname: result.firstname+" "+result.lastname,
+                        fromname: userResult.firstname+" "+userResult.lastname,
+                        from: userResult.phonenumber,
+                        to: result.phonenumber,
+                        fromid: userResult._id,
+                        toid: result._id,
+                        date: new Date(),
                         amount: req.body.amountSent
                       }).then((err, payment) => {
                         console.log('Payment created');
@@ -1528,6 +1533,21 @@ router.post('/api/payment/getministatements', (req, res) => {
         {to: req.body.userId}
       ]
     },
+    (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(403);
+      }else{
+        res.status(200).json(data);
+      }
+    }
+  )
+})
+
+
+router.get('/api/payment/getallministatements', authenticateToken, (req, res) => {
+  Payment.find(
+    {},
     (err, data) => {
       if (err) {
         console.log(err);
@@ -1633,8 +1653,6 @@ router.post("/api/admin/unblockuser", authenticateToken, (req, res) => {
 });
 
 router.post('/api/payment/sendCredits', (req, res) => {
-  console.log('we rule the world');
-  console.log(req.body.receiverId);
   Wallet.findOne(
     {uniqueId: req.body.receiverId},
     (err, userResult) => {
@@ -1649,8 +1667,14 @@ router.post('/api/payment/sendCredits', (req, res) => {
               res.json(result);
             }else{
               Payment.create({
+                toname: result.firstname+" "+result.lastname,
+                fromname: userResult.firstname+" "+userResult.lastname,
+                from: userResult.phonenumber,
+                to: result.phonenumber,
+                fromid: userResult._id,
                 from: userResult._id,
                 to: result._id,
+                date: Date(),
                 amount: req.body.amountSent
               }).then((err, payment) => {
                 console.log('Payment created');
