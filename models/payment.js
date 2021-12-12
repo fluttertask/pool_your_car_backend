@@ -33,7 +33,7 @@ const Payment = mongoose.model("Payment", {
         type: Date,
     },
 
-    ammount: {
+    amount: {
         type: Number,
     }
 
