@@ -1669,6 +1669,7 @@ router.post('/api/admin/sendCredits', (req, res) => {
               User.findOne(
                 {phonenumber: '+'+req.body.receiverId},
                 (err, user) => {
+                  if (err) return console.error(err);
                   Payment.create({
                     toname: user.firstname+" "+user.lastname,
                     fromname: "Admin",
