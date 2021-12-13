@@ -1555,6 +1555,7 @@ router.post('/api/payment/getministatements', (req, res) => {
         console.log(err);
         res.sendStatus(403);
       }else{
+        console.log(data)
         res.status(200).json(data);
       }
     }
