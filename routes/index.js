@@ -1485,50 +1485,55 @@ router.post('/api/user/sendCredits', (req, res) => {
       if (!err){
         if (userResult.balance > req.body.amountSent) {
           Wallet.findOneAndUpdate(
-            {userId: req.body.userId},
+            {uniqueId: req.body.receiverId},
             {
-              $inc: {balance: -req.body.amountSent}
+              $inc: {balance: +req.body.amountSent}
             },
-            (err, resultNew) => {
+            (err, result) => {
               if (!err){
-                Wallet.findOneAndUpdate(
-                  {uniqueId: req.body.receiverId},
-                  {
-                    $inc: {balance: +req.body.amountSent}
-                  },
-                  (err, result) => {
-                    if (!err){
-                      res.json(result);
-                      User.findById(
-                        req.body.userId,
-                        (err, sender) => {
-                          User.findById(
-                            result.userId,
-                            (err, reciever) => {
-                              Payment.create({
-                                toname: reciever.firstname+" "+reciever.lastname,
-                                fromname: sender.firstname+" "+sender.lastname,
-                                from: sender.phonenumber,
-                                to: reciever.phonenumber,
-                                fromid: sender._id,
-                                toid: reciever._id,
-                                date: new Date(),
-                                amount: req.body.amountSent
-                              }).then((err, payment) => {
-                                console.log('Payment created');
-                              })
-                            }
-                          );
-                        }
-                      );
-                      
-                    }else{
-                      res.status(400).json("Error adding to balance");
+                if (result){
+                  Wallet.findOneAndUpdate(
+                    {userId: req.body.userId},
+                    {
+                      $inc: {balance: -req.body.amountSent}
+                    },
+                    (err, resultNew) => {
+                      if (!err){
+                        res.json(result);
+                        User.findById(
+                          req.body.userId,
+                          (err, sender) => {
+                            User.findById(
+                              result.userId,
+                              (err, reciever) => {
+                                Payment.create({
+                                  toname: reciever.firstname+" "+reciever.lastname,
+                                  fromname: sender.firstname+" "+sender.lastname,
+                                  from: sender.phonenumber,
+                                  to: reciever.phonenumber,
+                                  fromid: sender._id,
+                                  toid: reciever._id,
+                                  date: new Date(),
+                                  amount: req.body.amountSent
+                                }).then((err, payment) => {
+                                  console.log('Payment created');
+                                })
+                              }
+                            );
+                          }
+                        );
+                        
+                      }else{
+                        res.status(400).json("Error deducing to balance");
+                        console.log("invalid");
+                      }
                     }
-                  }
-                )
+                  )
+                }else{
+                  res.status(400).json("This Account Does Not Exist");
+                }
               }else{
-                res.status(400).json("Error deducing to balance");
+                res.status(400).json("This Account Does Not Exist");
               }
             }
           )
