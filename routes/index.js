@@ -1477,6 +1477,8 @@ router.post('/api/payment/getwalletdetails', (req, res) => {
 });
 
 router.post('/api/user/sendCredits', (req, res) => {
+  
+  console.log(req.body);
   Wallet.findOne(
     {userId: req.body.userId},
     (err, userResult) => {
@@ -1500,6 +1502,7 @@ router.post('/api/user/sendCredits', (req, res) => {
                       User.findById(
                         req.body.userId,
                         (err, sender) => {
+                          console.log(res.body.receiverId);
                           User.findOne(
                             {phonenumber: req.body.receiverId},
                             (err, reciever) => {
