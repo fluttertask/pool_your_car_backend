@@ -1497,8 +1497,8 @@ router.post('/api/user/sendCredits', (req, res) => {
                   (err, result) => {
                     if (!err){
                       res.json(resultNew);
-                      User.findOne(
-                        {_id: req.body.userId},
+                      User.findById(
+                        req.body.userId,
                         (err, sender) => {
                           User.findOne(
                             {phonenumber: req.body.receiverId},
