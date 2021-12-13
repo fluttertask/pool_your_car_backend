@@ -1498,12 +1498,12 @@ router.post('/api/user/sendCredits', (req, res) => {
                   },
                   (err, result) => {
                     if (!err){
-                      res.json(resultNew);
+                      res.json(result);
                       User.findById(
                         req.body.userId,
                         (err, sender) => {
                           User.findById(
-                            resultNew.userId,
+                            result.userId,
                             (err, reciever) => {
                               Payment.create({
                                 toname: reciever.firstname+" "+reciever.lastname,
