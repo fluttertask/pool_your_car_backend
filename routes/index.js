@@ -1542,13 +1542,12 @@ router.post('/api/user/sendCredits', (req, res) => {
 
 router.post('/api/payment/getministatements', (req, res) => {
   Payment.find(
-    {to: req.body.userId},
-    // {
-    //   $or: [
-    //     {from: req.body.userId},
-    //     {to: req.body.userId}
-    //   ]
-    // },
+    {
+      $or: [
+        {fromid: req.body.userId},
+        {toid: req.body.userId}
+      ]
+    },
     (err, data) => {
       if (err) {
         console.log(err);
