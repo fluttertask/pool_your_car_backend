@@ -1497,7 +1497,6 @@ router.post('/api/user/sendCredits', (req, res) => {
                   (err, result) => {
                     if (!err){
                       res.json(resultNew);
-                      console.log(userId);
                       User.findOne(
                         {_id: req.body.userId},
                         (err, sender) => {
