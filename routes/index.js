@@ -799,17 +799,6 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
           },
           (err, wallet) => {
         });
-        // Admin.findOneAndUpdate(
-        //   {},
-        //   {$inc: {amount: +(req.body.amountSent*0.2)}},
-        //   () => {
-        //     if (!err) {
-        //       console.log('updating admin');
-        //     }else{
-        //       console.log('Error updating admin');
-        //     }
-        //   }
-        // );
         
         User.findByIdAndUpdate(
           req.body.userId,
@@ -1553,12 +1542,13 @@ router.post('/api/user/sendCredits', (req, res) => {
 
 router.post('/api/payment/getministatements', (req, res) => {
   Payment.find(
-    {
-      $or: [
-        {from: req.body.userId},
-        {to: req.body.userId}
-      ]
-    },
+    {to: req.body.userId},
+    // {
+    //   $or: [
+    //     {from: req.body.userId},
+    //     {to: req.body.userId}
+    //   ]
+    // },
     (err, data) => {
       if (err) {
         console.log(err);
