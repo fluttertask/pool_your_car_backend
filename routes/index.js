@@ -1503,8 +1503,8 @@ router.post('/api/user/sendCredits', (req, res) => {
                         req.body.userId,
                         (err, sender) => {
                           console.log(res.body.receiverId);
-                          User.findOne(
-                            {phonenumber: req.body.receiverId},
+                          User.findById(
+                            resultNew.userId,
                             (err, reciever) => {
                               Payment.create({
                                 toname: reciever.firstname+" "+reciever.lastname,
