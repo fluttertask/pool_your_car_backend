@@ -1502,7 +1502,6 @@ router.post('/api/user/sendCredits', (req, res) => {
                       User.findById(
                         req.body.userId,
                         (err, sender) => {
-                          console.log(res.body.receiverId);
                           User.findById(
                             resultNew.userId,
                             (err, reciever) => {
