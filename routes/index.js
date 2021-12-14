@@ -684,7 +684,6 @@ router.get("/api/ride/passengers/:id", (req, res)=>{
     req.params.id,
     (err, data) => {
     if (!err) {
-      console.log(data.passengersID);
 
       if (data != null) {
           
