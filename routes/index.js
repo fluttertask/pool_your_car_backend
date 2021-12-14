@@ -772,7 +772,7 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
       $inc: { availableseats: -1}
     },
     (err, ride) => {
-      if (err){
+      if (err || !ride){
         console.log(err);
         res.json({
           code: 200,
@@ -784,6 +784,8 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
           code: 200,
           message: "Ride Accepted"
         });
+
+        console.log(ride);
 
         Wallet.findOneAndUpdate(
           {userId: req.body.passengerID},

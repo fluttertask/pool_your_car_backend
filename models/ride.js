@@ -59,12 +59,10 @@ const Ride = mongoose.model("Ride", {
     type: String,
     required: true,
   },
-
   wallet: {
     type: mongoose.Schema.ObjectId,
     ref: "wallet"
   },
-
   optional_details: {
     type: String,
   },
