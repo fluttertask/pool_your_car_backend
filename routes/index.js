@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");
 const { Ride } = require("../models/ride");
 const { User } = require("../models/user");
+const { Conversation } = require("../models/conversation");
+const { Inbox } = require("../models/inboxconversationlist");
 const users_collection = "users";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -12,6 +14,7 @@ const multer = require("multer");
 const { appendFile } = require("fs");
 const DIR = "./public/images";
 var dateFormat = require("dateformat");
+const { json } = require("body-parser");
 var now = new Date();
 
 var ACCESS_TOKEN_SECRET =
@@ -129,7 +132,8 @@ let transporter = nodemailer.createTransport({
 });
 
 router.post("/api/user/sendemailotp", (req, res) => {
-  console.log(val);
+  var otp = Math.floor(1000 + Math.random() * 9000);
+  console.log(otp);
   transporter.sendMail(
     {
       from: '"PoolYourCar 👻" <poolyourc@gmail.com>', // sender address
@@ -142,7 +146,31 @@ router.post("/api/user/sendemailotp", (req, res) => {
       if (error) {
         res.send(error);
       } else {
-        res.send("Email sent: " + info.response);
+        res.status(200).json({
+          code: 200,
+          message: "Email sent: " + info.response,
+          otp: otp,
+        });
+        //res.send("Email sent: " + info.response);
+      }
+    }
+  );
+});
+
+//check email new email already exists
+
+router.get("/api/user/checkemailexists", (req, res) => {
+  User.findOne(
+    {
+      email: req.body.email,
+    },
+    (err, result) => {
+      if (!result) {
+        res.status(200).json({ message: "Email doesnot exists" });
+      } else {
+        res.status(400).json({
+          message: "Email " + req.body.email + '" is already taken',
+        });
       }
     }
   );
@@ -174,6 +202,29 @@ router.put("/api/user/verifyemail/:id", (req, res) => {
     console.log("bbhr");
     res.json("Invalid code");
   }
+  // });
+});
+
+//Update User email
+router.put("/api/user/changeemail/:userid", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.userid },
+    { $set: { emailverified: true, email: req.body.newemail } },
+    { new: true },
+    (err, user) => {
+      if (!err) {
+        console.log(user.emailverified);
+        res.status(200).json({
+          code: 200,
+          message: "Email Changed and verified",
+          updateUser: user,
+        });
+      } else {
+        console.log(err);
+      }
+    }
+  );
+
   // });
 });
 
@@ -227,6 +278,7 @@ router.post("/api/user/add", (req, res, next) => {
           lastname: req.body.lastname,
           phonenumber: req.body.phonenumber,
           email: req.body.email,
+          profile_image_url: null,
           password: hash,
           confirmpassword: hash,
           createdat: date,
@@ -361,6 +413,7 @@ router.get("/api/ride/getoverallofferedrides", (req, res) => {
 
 //Add Ride
 router.post("/api/ride/add", (req, res, next) => {
+  console.log(req.body);
   Ride.create(req.body)
     .then(
       (ride) => {
@@ -644,190 +697,323 @@ router.get("/api/ride/getallbookedridesofuser/:userid", (req, res) => {
 
 // Get all passengers in a ride
 
-router.get("/api/ride/passengers/:id", (req, res)=>{
-  Ride.findById(
-    req.params.id,
-    (err, data) => {
+router.get("/api/ride/passengers/:id", (req, res) => {
+  Ride.findById(req.params.id, (err, data) => {
     if (!err) {
       console.log(data.passengersID);
 
       if (data != null) {
-          
         User.find(
-          {_id: { 
-            $in: data.passengersID,
-          }},
-          (err, passengers)=>{
-            console.log(passengers)
+          {
+            _id: {
+              $in: data.passengersID,
+            },
+          },
+          (err, passengers) => {
+            console.log(passengers);
             User.find(
-              {_id: { 
-                $in: data.requestedPassengers
-              }},
-              (err, requestedPassengers)=>{
-                console.log(requestedPassengers)
+              {
+                _id: {
+                  $in: data.requestedPassengers,
+                },
+              },
+              (err, requestedPassengers) => {
+                console.log(requestedPassengers);
                 return res.json({
                   code: 200,
                   message: "Passenger has been provided",
                   passengers: passengers,
                   requestedpassengers: requestedPassengers,
-                })
+                });
               }
-            )
+            );
           }
-        )
+        );
       }
-    }else{
+    } else {
       res.json({
         code: 401,
         message: "Passenger could not be provided",
       });
     }
-  })
+  });
 });
 
 //Listening for notification
 
-router.get("/api/ride/listenfornotifications/:id", (req, res)=>{
-  User.findById(req.params.id)
-  .populate('notifications')
-  then((notifications)=>{
+router.get("/api/ride/listenfornotifications/:id", (req, res) => {
+  User.findById(req.params.id).populate("notifications");
+  then((notifications) => {
     res.json(notifications);
   });
-})
+});
 
 //Checking for Notifications
 
-router.get("/api/ride/requestnotifications/:id", (req, res)=>{
+router.get("/api/ride/requestnotifications/:id", (req, res) => {
   User.findById(req.params.id)
-  .populate('notifications')
-  .then((notifications)=>{
-    res.json(notifications);
-  });
-})
+    .populate("notifications")
+    .then((notifications) => {
+      res.json(notifications);
+    });
+});
 
 //Accept ride request from the passenger by the Driver
 
-router.post('/api/ride/acceptride', (req, res)=>{
-  Ride.findById(
-    req.body.id,
-    (ridee)=>{
-      Ride.findByIdAndUpdate(
-        req.body.id,
-        {
-          $push: {passengersID: req.body.passengersID},
-          $pull: {requestedpassengers: req.body.passengersID},
-          $inc: { availableseats: -1}
-        },
-        (err, ride) => {
-          if (err){
-            console.log(err);
-            res.json({
-              code: 200,
-              message: "Error accepting Ride"
-            })
-          }else{
-            console.log(ride);
-            res.json({
-              code: 200,
-              message: "Ride Accepted"
-            })
-            User.findByIdAndUpdate(
-              req.body.passengersID,
-              {
-                $pull: {
-                  Notification: {
-                    ride: req.body.id,
-                    message: "Ride has been accepted"
-                  }
-                },
-              }
-            )
-          }
+router.post("/api/ride/acceptride", (req, res) => {
+  Ride.findById(req.body.id, (ridee) => {
+    Ride.findByIdAndUpdate(
+      req.body.id,
+      {
+        $push: { passengersID: req.body.passengersID },
+        $pull: { requestedpassengers: req.body.passengersID },
+        $inc: { availableseats: -1 },
+      },
+      (err, ride) => {
+        if (err) {
+          console.log(err);
+          res.json({
+            code: 200,
+            message: "Error accepting Ride",
+          });
+        } else {
+          console.log(ride);
+          res.json({
+            code: 200,
+            message: "Ride Accepted",
+          });
+          User.findByIdAndUpdate(req.body.passengersID, {
+            $pull: {
+              Notification: {
+                ride: req.body.id,
+                message: "Ride has been accepted",
+              },
+            },
+          });
         }
-      )
-    }
-  )
-})
+      }
+    );
+  });
+});
 
 //Reject ride request from the passenger by the Driver
 
-router.post('/api/ride/rejectride:id', (req, res)=>{
-  Ride.findById(
-    req.params.id,
-    (ridee)=>{
-      Ride.findByIdAndUpdate(
-        req.params.id,
-        {
-          $push: {passengersID: req.body.passengersID},
-          $pull: {requestedpassengers: req.body.passengersID},
-        },
-        (err, ride) => {
-          if (err){
-            console.log(err);
-            res.json({
-              code: 200,
-              message: "Error In Rejecting Ride"
-            })
-          }else{
-            console.log(ride);
-            User.findByIdAndUpdate(
-              req.body.passengersID,
-              {
-                $pull: {
-                  Notification: {
-                    passengerID: req.body,
-                    ride: req.params.id,
-                    message: "Ride has been accepted"
-                  }
-                },
-              }
-            )
-            res.json({
-              code: 200,
-              message: "Ride Rejected"
-            })
-          }
+router.post("/api/ride/rejectride:id", (req, res) => {
+  Ride.findById(req.params.id, (ridee) => {
+    Ride.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: { passengersID: req.body.passengersID },
+        $pull: { requestedpassengers: req.body.passengersID },
+      },
+      (err, ride) => {
+        if (err) {
+          console.log(err);
+          res.json({
+            code: 200,
+            message: "Error In Rejecting Ride",
+          });
+        } else {
+          console.log(ride);
+          User.findByIdAndUpdate(req.body.passengersID, {
+            $pull: {
+              Notification: {
+                passengerID: req.body,
+                ride: req.params.id,
+                message: "Ride has been accepted",
+              },
+            },
+          });
+          res.json({
+            code: 200,
+            message: "Ride Rejected",
+          });
         }
-      )
-    }
-  )
-})
+      }
+    );
+  });
+});
 
 // Book ride api
 
 router.post("/api/ride/bookride/:id", (req, res) => {
   Ride.findByIdAndUpdate(
-    req.params.id, 
+    req.params.id,
     {
-      $push: {requestedPassengers: req.body.userId},
+      $push: { requestedPassengers: req.body.userId },
     },
-    {new: true},
+    { new: true },
     (err, data) => {
-    if (!err) {
-      console.log(data);
+      if (!err) {
+        console.log(data);
 
-      if (data != null) {
+        if (data != null) {
+          User.findOneAndUpdate(
+            { _id: req.body.userId },
+            { $push: { bookedride: req.params.id } },
+            { new: true },
+            (err, doc) => {
+              if (!err) {
+                console.log(doc);
+                User.findOneAndUpdate(
+                  { _id: data.driverId },
+                  {
+                    $push: {
+                      notifications: {
+                        passengerID: req.body.userId,
+                        type: "bookrequest",
+                        ride: req.params.id,
+                        message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
+                        read: false,
+                      },
+                    },
+                  },
+                  { new: true },
+                  (err, data) => {
+                    if (!err) {
+                      console.log(doc);
+                    } else {
+                      console.log(err);
+                    }
+                  }
+                );
+              } else {
+                console.log(err);
+              }
+            }
+          ),
+            res.json({
+              code: 200,
+              message: "Ride booked successfully",
+              passengers: data.passengersID,
+            });
+        } else {
+          res.json({
+            code: 200,
+            message: "Ride not found",
+          });
+        }
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+//cancel booked ride api
+
+router.post("/api/ride/cancelbookedride/:id", (req, res) => {
+  Ride.findByIdAndUpdate(
+    req.params.id,
+    {
+      $pull: { requestedPassengers: req.body.userId },
+      $inc: { availableseats: +1 },
+    },
+    { new: true },
+    (err, data) => {
+      if (!err) {
+        console.log(data);
+
+        if (data != null) {
+          User.findOneAndUpdate(
+            { _id: req.body.userId },
+            { $pull: { bookedride: req.params.id } },
+            { new: true },
+            (err, doc) => {
+              if (!err) {
+                console.log(doc);
+              } else {
+                console.log(err);
+              }
+            }
+          ),
+            res.json({
+              code: 200,
+              message: "Booked ride has been removed successfully",
+              deleteRide: data,
+            });
+        } else {
+          Ride.findByIdAndUpdate(
+            req.params.id,
+            {
+              $pull: { requestedPassengers: req.body.userId },
+            },
+            { new: true },
+            (err, data) => {
+              if (!err) {
+                console.log(data);
+
+                if (data != null) {
+                  User.findOneAndUpdate(
+                    { _id: req.body.userId },
+                    { $pull: { bookedride: req.params.id } },
+                    { new: true },
+                    (err, doc) => {
+                      if (!err) {
+                        console.log(doc);
+                      } else {
+                        console.log(err);
+                      }
+                    }
+                  ),
+                    res.json({
+                      code: 200,
+                      message: "Booked ride has been removed successfully",
+                      deleteRide: data,
+                    });
+                } else {
+                  res.json({
+                    code: 200,
+                    message: "Ride not found",
+                  });
+                }
+              } else {
+                console.log(err);
+              }
+            }
+          );
+        }
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+// const iofunction = require("../app");
+
+//Create Conversation in Inbox
+
+router.post("/api/conversation/createconversation", (req, res, next) => {
+  console.log(req.body);
+  Conversation.create(req.body)
+    .then(
+      (conversation) => {
+        console.log("Conversation has been created ", conversation);
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        // res.json(ride);
+        console.log(conversation._id);
 
         User.findOneAndUpdate(
-          { _id: req.body.userId },
-          { $push: { bookedride: req.params.id } },
+          { _id: req.body.firstUserId },
+          { $push: { inboxconversations: conversation._id } },
           { new: true },
           (err, doc) => {
             if (!err) {
               console.log(doc);
               User.findOneAndUpdate(
-                { _id: data.driverId},
-                { $push: { notifications: {
-                    passengerID: req.body.userId,
-                    type: 'bookrequest',
-                    ride: req.params.id,
-                    message: `Ride has been requested by ${doc.firstname} ${doc.lastname}`,
-                    read: false
-                }, } },
+                { _id: req.body.secondUserId },
+                { $push: { inboxconversations: conversation._id } },
                 { new: true },
-                (err, data) => {
+                (err, doc) => {
                   if (!err) {
                     console.log(doc);
+                    res.status(200).json({
+                      code: 200,
+                      message: "Conversation added in users inbox",
+                      conversation: conversation,
+                    });
                   } else {
                     console.log(err);
                   }
@@ -837,103 +1023,201 @@ router.post("/api/ride/bookride/:id", (req, res) => {
               console.log(err);
             }
           }
-        ),
-          res.json({
-            code: 200,
-            message: "Ride booked successfully",
-            passengers: data.passengersID,
-          });
-      } else {
-        res.json({
-          code: 200,
-          message: "Ride not found",
-        });
-      }
-    } else {
-      console.log(err);
-    }
-  });
+        );
+      },
+      (err) => next(err)
+    )
+    .catch((err) => next(err));
 });
 
+var found = false;
+async function findConversation(conversationIdList, secondUserId) {
+  try {
+    let promises = conversationIdList.map(async (conversationid) => {
+      let conversationDetail = await Conversation.findById(conversationid);
+      if (
+        conversationDetail.firstUserId == secondUserId ||
+        conversationDetail.secondUserId == secondUserId
+      ) {
+        console.log("id matched");
+        found = true;
+        return conversationDetail;
+      }
+    });
+    let finalConversationDetail = await Promise.all(promises);
+    //console.log(convoArray);
+    return finalConversationDetail;
+  } catch (err) {
+    throw err;
+  }
+}
+router.get(
+  "/api/conversation/searchconversationexists/:myid/:seconduserid",
+  (req, res) => {
+    const firstUserId = req.params.myid;
+    const secondUserId = req.params.seconduserid;
+    User.findById(req.params.myid, async (err, _user) => {
+      if (!err) {
+        //res.send(_user.inboxconversations);
+        if (_user.inboxconversations != null) {
+          let afterfunctioncallConversation = await findConversation(
+            _user.inboxconversations,
+            secondUserId
+          );
+          if (found == true) {
+            // console.log("found true");
+            // console.log(afterfunctioncallConversation[0]);
+            res.status(200).json(afterfunctioncallConversation[0]);
+          }
+          if (found == false) {
+            res.json("Create New Conversation");
+          }
+        } else {
+          res.json("Create New Conversation");
+        }
+      } else {
+        console.log(err);
+      }
+    });
+  }
+);
 
-//cancel booked ride api
+//get Inbox Conversations of user
+var conversationsDetailsArray = [];
+async function doSomething(userid) {
+  try {
+    let _user = await User.findById(userid);
+    //console.log(_user.inboxconversations, "2");
+    if (_user.inboxconversations.length > 0) {
+      console.log(_user.inboxconversations.length);
+      let promises = _user.inboxconversations.map(async (_conversationId) => {
+        let conversationDetails = await Conversation.findById(_conversationId)
+          .populate("firstUserId")
+          .populate("secondUserId");
 
-router.post("/api/ride/cancelbookedride/:id", (req, res) => {
-  Ride.findByIdAndUpdate(
-    req.params.id, 
-    {
-      $pull: {requestedPassengers: req.body.userId},
-      $inc: { availableseats: +1}
-    },
-    {new: true},
-    (err, data) => {
+        // console.log("3");
+        // conversationsDetailsArray.push(conversationDetails);
+        //console.log("4");
+        // console.log(conversationsDetailsArray);
+        // console.log(err);
+
+        //console.log("5");
+        // console.log(conversationsDetailsArray);
+        return conversationDetails;
+      });
+      let convoArray = await Promise.all(promises);
+      //console.log(convoArray);
+      return convoArray;
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
+router.get(
+  "/api/conversation/getusersallconversations/:userid",
+  async (req, res) => {
+    const userid = req.params.userid;
+    console.log("1.........................");
+    let afterDoSomethingConvo = await doSomething(userid);
+
+    res.status(200).json({
+      code: 200,
+      message: "Conversations are",
+      conversations: afterDoSomethingConvo,
+    });
+  }
+);
+
+// send message to existing conversation
+router.put(
+  "/api/conversation/appendmessageinconversation/:conversationid",
+  (req, res) => {
+    console.log(req.params.conversationid);
+    const msg = {
+      senderId: req.body.senderId,
+      text: req.body.text,
+      timestamp: req.body.timestamp,
+    };
+    Conversation.findByIdAndUpdate(
+      { _id: req.params.conversationid },
+      { $push: { message: msg } },
+      { new: true },
+      (err, _conversation) => {
+        // io.to(req.params.conversationid).emit("newmessage", msg);
+        if (!err) {
+          res.status(200).json({ code: 200, conversation: _conversation });
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  }
+);
+
+//get user single conversation by convo id
+router.get(
+  "/api/conversation/getsingleconversation/:conversationid",
+  async (req, res) => {
+    try {
+      let _conversation = await Conversation.findById(
+        req.params.conversationid
+      ).populate("secondUserId");
+      res.status(200).json({
+        conversation: _conversation,
+      });
+    } catch (err) {
+      res.send(err);
+    }
+  }
+);
+
+searchConversation = (myid, seconduserId) => {
+  const firstUserId = myid;
+  const secondUserId = seconduserId;
+  User.findById(firstUserId, async (err, _user) => {
     if (!err) {
-      console.log(data);
-
-      if (data != null) {
-
-        User.findOneAndUpdate(
-          { _id: req.body.userId },
-          { $pull: { bookedride: req.params.id } },
-          { new: true },
-          (err, doc) => {
-            if (!err) {
-              console.log(doc);
-            } else {
-              console.log(err);
-            }
-          }
-        ),
-          res.json({
-            code: 200,
-            message: "Booked ride has been removed successfully",
-            deleteRide: data,
-          });
-      } else {
-        Ride.findByIdAndUpdate(
-          req.params.id, 
-          {
-            $pull: {requestedPassengers: req.body.userId},
-          },
-          {new: true},
-          (err, data) => {
-          if (!err) {
-            console.log(data);
-      
-            if (data != null) {
-              User.findOneAndUpdate(
-                { _id: req.body.userId },
-                { $pull: { bookedride: req.params.id } },
-                { new: true },
-                (err, doc) => {
-                  if (!err) {
-                    console.log(doc);
-                  } else {
-                    console.log(err);
-                  }
-                }
-              ),
-                res.json({
-                  code: 200,
-                  message: "Booked ride has been removed successfully",
-                  deleteRide: data,
-                });
-            } else {
-              res.json({
-                code: 200,
-                message: "Ride not found",
-              });
-            }
-          } else {
-            console.log(err);
-          }
-        });
+      //res.send(_user.inboxconversations);
+      let afterfunctioncallConversation = await findConversation(
+        _user.inboxconversations,
+        secondUserId
+      );
+      if (found == true) {
+        // console.log("found true");
+        // console.log(afterfunctioncallConversation[0]);
+        // res.status(200).json(afterfunctioncallConversation[0]);
+      }
+      if (found == false) {
+        //res.json("Create New Conversation");
       }
     } else {
       console.log(err);
     }
   });
-});
+};
 
+appendConversation = (conversationId, senderid, messageText, timeStamp) => {
+  console.log(req.params.conversationid);
+  const conversationid = conversationId;
+  const msg = {
+    senderId: senderid,
+    text: messageText,
+    timestamp: timeStamp,
+  };
+  Conversation.findByIdAndUpdate(
+    { _id: conversationid },
+    { $push: { message: msg } },
+    { new: true },
+    (err, _conversation) => {
+      if (!err) {
+        //res.status(200).json({ code: 200, conversation: _conversation });
+      } else {
+        //res.send(err);
+      }
+    }
+  );
+};
 
 module.exports = router;
+module.exports.searchConversation = searchConversation;
+module.exports.appendConversation = this.appendConversation;

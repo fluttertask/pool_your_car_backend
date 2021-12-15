@@ -44,6 +44,7 @@ const Ride = mongoose.model("Ride", {
     type: Number,
     required: true,
   },
+
   passengers: [
     {
       type: mongoose.Schema.ObjectId,
@@ -56,11 +57,18 @@ const Ride = mongoose.model("Ride", {
     type: String,
     required: true,
   },
-  vehicle_registration_number: {
+  car_name: {
     type: String,
     required: true,
   },
-
+  car_registration_number: {
+    type: String,
+    required: true,
+  },
+  car_manufacture_year: {
+    type: String,
+    required: true,
+  },
   optional_details: {
     type: String,
   },

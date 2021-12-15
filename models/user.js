@@ -58,11 +58,11 @@ const User = mongoose.model("User", {
         ref: "Ride",
       },
       message: {
-        type: String
+        type: String,
       },
       read: {
-        type: Boolean
-      }
+        type: Boolean,
+      },
     },
   ],
   walletID: {
@@ -93,7 +93,13 @@ const User = mongoose.model("User", {
       ref: "Ride",
     },
   ],
-  
+  inboxconversations: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Conversation",
+      required: true,
+    },
+  ],
 });
 
 module.exports = { User };
