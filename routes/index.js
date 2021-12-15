@@ -1035,7 +1035,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
         }else {
           Wallet.findOneAndUpdate(
             {userId:  data.driverId},
-            {$inc: {amount: -(req.body.amountSent*0.2)}},
+            {$inc: {balance: -(req.body.amountSent*0.2)}},
             (err, result) => {
               if (!err) {
                 console.log('updating wallet');
@@ -1047,7 +1047,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
 
           Wallet.findOneAndUpdate(
             {userId: req.body.userId},
-            {$inc: {amount: +(req.body.amountSent*0.2)}},
+            {$inc: {balance: +(req.body.amountSent*0.2)}},
             (err, result) => {
               if (!err) {
                 console.log('updating wallet');
@@ -1405,7 +1405,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
                 console.log(doc);
                 Wallet.findOneAndUpdate(
                   {userId: id},
-                  {$inc: {amount: -(req.body.amountSent*0.8)}},
+                  {$inc: {balance: -(req.body.amountSent*0.8)}},
                   (err, result) => {
                     if (!err) {
                       // console.log('updating wallet');
@@ -1423,7 +1423,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 
         Wallet.findOneAndUpdate(
           {userId: req.body.userId},
-          {$inc: {amount: +(req.body.amountSent*0.6 * data.passengersID.length)}},
+          {$inc: {balance: +(req.body.amountSent*0.6 * data.passengersID.length)}},
           (err, result) => {
             if (!err) {
               console.log('updating wallet');
@@ -1435,7 +1435,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 
         Admin.findOneAndUpdate(
           {},
-          {$inc: {amount: +(req.body.amountSent*0.2)}},
+          {$inc: {totalAmount: +(req.body.amountSent*0.2)}},
           () => {
             if (!err) {
               console.log('updating admin');
