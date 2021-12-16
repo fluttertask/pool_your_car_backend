@@ -470,7 +470,7 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
       if (data != null) {
         User.findOneAndUpdate(
           { _id: req.body.userId },
-          { $pull: { offeredride: req.params.id } },
+          { $pull: { offeredride: data.driverId } },
           { new: true },
           (err, doc) => {
             if (!err) {
@@ -1423,17 +1423,17 @@ router.post("/api/ride/endride", (req, res) => {
             (err, doc) => {
               if (!err) {
                 console.log(doc);
-                Wallet.findOneAndUpdate(
-                  {userId: id},
-                  {$inc: {balance: -(ride.ridefare*0.8)}},
-                  (err, result) => {
-                    if (!err) {
-                      // console.log('updating wallet');
-                    }else{
-                      console.log('Error updating wallet');
-                    }
-                  }
-                );
+                // Wallet.findOneAndUpdate(
+                //   {userId: id},
+                //   {$inc: {balance: -(ride.ridefare*0.8)}},
+                //   (err, result) => {
+                //     if (!err) {
+                //       // console.log('updating wallet');
+                //     }else{
+                //       console.log('Error updating wallet');
+                //     }
+                //   }
+                // );
               } else {
                 console.log(err);
               }
@@ -1443,7 +1443,7 @@ router.post("/api/ride/endride", (req, res) => {
 
         Wallet.findOneAndUpdate(
           {userId: req.body.userId},
-          {$inc: {balance: +(ride.ridefare*0.6 * data.passengersID.length)}},
+          {$inc: {balance: -(ride.ridefare*0.2 * data.passengersID.length)}},
           (err, result) => {
             if (!err) {
               console.log('updating wallet');
