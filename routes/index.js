@@ -1512,7 +1512,7 @@ router.post('/api/user/sendCredits', (req, res) => {
                       },
                       (err, resultNew) => {
                         if (!err){
-                          res.json(result);
+                          res.json(resultNew);
                           User.findById(
                             req.body.userId,
                             (err, sender) => {
@@ -1700,7 +1700,7 @@ router.post("/api/admin/login", (req, res) => {
         res.status(200).json(response);
         Admin.findOneAndUpdate(
           { email: req.body.email},
-          {$set: {lastlogin: new Date()}},
+          {$set: {lastlogin: Date().split('+')[0]}},
           (err, admin) => {});
       } else {
         res.status(400).json("Invalid password");
