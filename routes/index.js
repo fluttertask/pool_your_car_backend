@@ -1068,7 +1068,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                 }
               );
 
-              data.passengersID.map((passenger) => {
+              datas.passengersID.map((passenger) => {
                 Wallet.findOneAndUpdate(
                   {userId: passenger},
                   {$inc: {balance: +(data.ridefare*0.2)}},
