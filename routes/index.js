@@ -500,7 +500,18 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
         data.requestedPassengers.map((passenger)=>{
           User.findOneAndUpdate(
             { _id: passenger },
-            { $pull: { bookedride: req.params.id }
+            { $pull: { bookedride: req.params.id },
+            $push: {
+              notifications: {
+                ride: req.body.rideId,
+                senderID: req.body.userId,
+                message: "Ride has been deleted by the driver",
+                type: 'startaccepted',
+                from: ride.pickuplocation,
+                to: ride.droplocation,
+                read: false
+              }
+            }
             },
             { new: true },
             (err, doc) => {
@@ -516,7 +527,18 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
         data.passengersID.map((passenger)=>{
           User.findOneAndUpdate(
             { _id: passenger },
-            { $pull: { bookedride: req.params.id }
+            { $pull: { bookedride: req.params.id },
+              $push: {
+                notifications: {
+                  ride: req.body.rideId,
+                  senderID: req.body.userId,
+                  message: "Ride has been deleted by the driver",
+                  type: 'startaccepted',
+                  from: ride.pickuplocation,
+                  to: ride.droplocation,
+                  read: false
+                }
+              }
             },
             { new: true },
             (err, doc) => {
@@ -1417,8 +1439,20 @@ router.post("/api/ride/endride", (req, res) => {
         data.passengersID.forEach((id)=>{
           User.findOneAndUpdate(
             { _id: id },
-            { $push: { pastbookedride: req.body.rideId } },
-            { $pull: { bookedride: req.body.rideId } },
+            { $push: { pastbookedride: req.body.rideId } ,
+              $push: {
+                notifications: {
+                  ride: req.body.rideId,
+                  senderID: req.body.userId,
+                  message: "Ride has ended",
+                  type: 'startaccepted',
+                  from: ride.pickuplocation,
+                  to: ride.droplocation,
+                  read: false
+                }
+              },
+
+              $pull: { bookedride: req.body.rideId } },
             { new: true },
             (err, doc) => {
               if (!err) {
@@ -1442,8 +1476,8 @@ router.post("/api/ride/endride", (req, res) => {
         });
 
         Wallet.findOneAndUpdate(
-          {userId: req.body.userId},
-          {$inc: {balance: -(ride.ridefare*0.2 * data.passengersID.length)}},
+          {userId: ride.driverId},
+          {$inc: {balance: -(ride.ridefare*0.2 * ride.passengersID.length)}},
           (err, result) => {
             if (!err) {
               console.log('updating wallet');
