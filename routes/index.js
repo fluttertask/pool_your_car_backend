@@ -1424,9 +1424,9 @@ router.post("/api/ride/endride", (req, res) => {
 
         User.findOneAndUpdate(
           { _id: req.body.userId },
-          { $push: { pastofferedride: req.body.rideId } },
-          { $pull: { offeredride: req.body.rideId } },
-          { new: true },
+          {  $push: { pastofferedride: req.body.rideId },
+            $pull: { offeredride: req.body.rideId }
+          },
           (err, doc) => {
             if (!err) {
               console.log(doc);
