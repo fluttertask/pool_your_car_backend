@@ -497,7 +497,7 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
           }
         );
 
-        data.requestedPassengers.forEach((index, passenger)=>{
+        data.requestedPassengers.map((passenger)=>{
           User.findOneAndUpdate(
             { _id: passenger },
             { $pull: { bookedride: req.params.id }
@@ -513,7 +513,7 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
           );
         });
 
-        data.passengersID.forEach((index, passenger)=>{
+        data.passengersID.map((passenger)=>{
           User.findOneAndUpdate(
             { _id: passenger },
             { $pull: { bookedride: req.params.id }
