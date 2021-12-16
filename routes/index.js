@@ -480,11 +480,65 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
             }
           }
         ),
-          res.json({
-            code: 200,
-            message: "Ride deleted successfully",
-            deleteRide: data,
-          });
+        res.json({
+          code: 200,
+          message: "Ride deleted successfully",
+          deleteRide: data,
+        });
+        Wallet.findOneAndUpdate(
+          {userId:  data.driverId},
+          {$inc: {balance: -(data.ridefare*0.2*datas.passengersID.length)}},
+          (err, result) => {
+            if (!err) {
+              console.log('updating wallet');
+            }else{
+              console.log('Error updating wallet');
+            }
+          }
+        );
+
+        data.requestedPassengers.forEach((index, passenger)=>{
+          User.findOneAndUpdate(
+            { _id: passenger },
+            { $pull: { bookedride: req.params.id }
+            },
+            { new: true },
+            (err, doc) => {
+              if (!err) {
+                console.log(doc);
+              } else {
+                console.log(err);
+              }
+            }
+          );
+        });
+
+        data.passengersID.forEach((index, passenger)=>{
+          User.findOneAndUpdate(
+            { _id: passenger },
+            { $pull: { bookedride: req.params.id }
+            },
+            { new: true },
+            (err, doc) => {
+              if (!err) {
+                console.log(doc);
+              } else {
+                console.log(err);
+              }
+            }
+          ),
+          Wallet.findOneAndUpdate(
+            {userId: passenger},
+            {$inc: {balance: +(data.ridefare*0.2)}},
+            (err, result) => {
+              if (!err) {
+                console.log('updating wallet');
+              } else {
+                console.log('Error updating wallet');
+              }
+            }
+          );
+        });
       } else {
         res.json({
           code: 200,
@@ -996,90 +1050,36 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
             const d = new Date(data.date + ' ' + data.time);
             const n = new Date();
 
-            var last = ((((d.getFullYear() * 12) + d.getMonth()) * 30) + d.getDate()) * 24;
-            var now = ((((n.getFullYear() * 12) + n.getMonth()) * 30) + n.getDate()) * 24;
+            var last = (((((d.getFullYear() * 12) + d.getMonth()) * 30) + d.getDate()) * 24)+d.getHours();
+            var now = (((((n.getFullYear() * 12) + n.getMonth()) * 30) + n.getDate()) * 24)+n.getHours();
             console.log()
-            if ((now - last) < 6) {
-              if (data.driverId == req.body.userId){
-                Wallet.findOneAndUpdate(
-                  {userId:  data.driverId},
-                  {$inc: {balance: -(data.ridefare*0.2*datas.passengersID.length)}},
-                  (err, result) => {
-                    if (!err) {
-                      console.log('updating wallet');
-                    }else{
-                      console.log('Error updating wallet');
-                    }
-                  }
-                );
-      
-                datas.passengersID.forEach((index, passenger)=>{
-                  Wallet.findOneAndUpdate(
-                    {userId: passenger},
-                    {$inc: {balance: +(data.ridefare*0.2)}},
-                    (err, result) => {
-                      if (!err) {
-                        console.log('updating wallet');
-                      } else {
-                        console.log('Error updating wallet');
-                      }
-                    }
-                  );
-                });passengers
-              }
+            if ((last - now) < 6) {
+              
             }else {
-              if (data.driverId == req.body.userId){
-                Wallet.findOneAndUpdate(
-                  {userId:  data.driverId},
-                  {$inc: {balance: -(data.ridefare*0.2*datas.passengersID.length)}},
-                  (err, result) => {
-                    if (!err) {
-                      console.log('updating wallet');
-                    }else{
-                      console.log('Error updating wallet');
-                    }
+              Wallet.findOneAndUpdate(
+                {userId:  data.driverId},
+                {$inc: {balance: -(data.ridefare*0.2)}},
+                (err, result) => {
+                  if (!err) {
+                    console.log('updating wallet');
+                  }else{
+                    console.log('Error updating wallet');
                   }
-                );
-      
-                datas.passengersID.forEach((index, passenger)=>{
-                  Wallet.findOneAndUpdate(
-                    {userId: passenger},
-                    {$inc: {balance: +(data.ridefare*0.2)}},
-                    (err, result) => {
-                      if (!err) {
-                        console.log('updating wallet');
-                      } else {
-                        console.log('Error updating wallet');
-                      }
-                    }
-                  );
-                });
-              }else{
-                Wallet.findOneAndUpdate(
-                  {userId:  data.driverId},
-                  {$inc: {balance: -(data.ridefare*0.2)}},
-                  (err, result) => {
-                    if (!err) {
-                      console.log('updating wallet');
-                    }else{
-                      console.log('Error updating wallet');
-                    }
+                }
+              );
+              
+              Wallet.findOneAndUpdate(
+                {userId: req.body.userId},
+                {$inc: {balance: +(data.ridefare*0.2)}},
+                (err, result) => {
+                  if (!err) {
+                    console.log('updating wallet');
+                  } else {
+                    console.log('Error updating wallet');
                   }
-                );
-                
-                Wallet.findOneAndUpdate(
-                  {userId: req.body.userId},
-                  {$inc: {balance: +(data.ridefare*0.2)}},
-                  (err, result) => {
-                    if (!err) {
-                      console.log('updating wallet');
-                    } else {
-                      console.log('Error updating wallet');
-                    }
-                  }
-  
-                );
-              }
+                }
+
+              );
             }
 
             res.json({
