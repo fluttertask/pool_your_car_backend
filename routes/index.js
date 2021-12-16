@@ -4,6 +4,7 @@ const { Ride } = require("../models/ride");
 const { User } = require("../models/user");
 const { Conversation } = require("../models/conversation");
 const { Inbox } = require("../models/inboxconversationlist");
+
 const users_collection = "users";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -132,6 +133,7 @@ let transporter = nodemailer.createTransport({
 });
 
 router.post("/api/user/sendemailotp", (req, res) => {
+   
   var otp = Math.floor(1000 + Math.random() * 9000);
   console.log(otp);
   transporter.sendMail(
@@ -1217,6 +1219,52 @@ appendConversation = (conversationId, senderid, messageText, timeStamp) => {
     }
   );
 };
+
+//rate user
+
+router.put("/api/user/rateuser/:userid", (req, res) => {
+  const newrating = req.body.newrating;
+  console.log(newrating);
+  User.findByIdAndUpdate(
+    { _id: req.params.userid },
+    { $push: { allratings: newrating } },
+    { new: true },
+    (err, _user) => {
+      if (!err) {
+        var previouslyllratings = _user.allratings;
+        var sumofratings = 0;
+        console.log("starting foreach");
+        previouslyllratings.forEach((data) => {
+          console.log(data);
+          sumofratings = sumofratings + data;
+        });
+        console.log(sumofratings);
+        var averagerating = sumofratings / previouslyllratings.length;
+        console.log("average is ");
+        console.log(averagerating);
+
+        console.log(previouslyllratings.length);
+        User.findByIdAndUpdate(
+          { _id: req.params.userid },
+          { $set: { userRate: averagerating } },
+          { new: true },
+          (err, updateduser) => {
+            if (!err) {
+              res.send(updateduser);
+            } else {
+              res.send(err);
+            }
+          }
+        );
+        //res.send(_user);
+      } else {
+        res.send(err);
+      }
+    }
+  );
+});
+
+//getUser ratings
 
 module.exports = router;
 module.exports.searchConversation = searchConversation;

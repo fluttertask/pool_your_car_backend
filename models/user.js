@@ -100,6 +100,15 @@ const User = mongoose.model("User", {
       required: true,
     },
   ],
+  userRate: {
+    default: 0,
+    type: Number,
+  },
+  allratings: [
+    {
+      type: Number,
+    },
+  ],
 });
 
 module.exports = { User };
