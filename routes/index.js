@@ -1566,6 +1566,7 @@ router.post('/api/user/sendCredits', (req, res) => {
                       },
                       (err, resultNew) => {
                         if (!err){
+                          res.json(resultNew);
                           User.findById(
                             req.body.userId,
                             (err, sender) => {
