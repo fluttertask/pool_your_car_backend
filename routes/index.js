@@ -1483,8 +1483,8 @@ router.post('/api/user/sendCredits', (req, res) => {
     {userId: req.body.userId},
     (err, userResult) => {
       if (!err){
-        if (req.body.receiverId != '+000000001'){
-          if (userResult.balance > req.body.amountSent) {
+        if (userResult.balance > req.body.amountSent) {
+          if (req.body.receiverId != '+000000001'){
             Wallet.findOneAndUpdate(
               {uniqueId: req.body.receiverId},
               {
