@@ -487,7 +487,7 @@ router.delete("/api/ride/deleteofferedride/:id", (req, res) => {
         });
         Wallet.findOneAndUpdate(
           {userId:  data.driverId},
-          {$inc: {balance: -(data.ridefare*0.2*datas.passengersID.length)}},
+          {$inc: {balance: -(data.ridefare*0.2*data.passengersID.length)}},
           (err, result) => {
             if (!err) {
               console.log('updating wallet');
@@ -1067,19 +1067,32 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                   }
                 }
               );
-              
-              Wallet.findOneAndUpdate(
-                {userId: req.body.userId},
-                {$inc: {balance: +(data.ridefare*0.2)}},
-                (err, result) => {
+
+              User.findByIdAndUpdate(
+                req.body.userId,
+                { $pull: { bookedride: req.params.id } },
+                { new: true },
+                (err, doc) => {
                   if (!err) {
-                    console.log('updating wallet');
+                    console.log(doc);
+                    Wallet.findOneAndUpdate(
+                      {userId: doc._id},
+                      {$inc: {balance: +(data.ridefare*0.2)}},
+                      (err, result) => {
+                        if (!err) {
+                          console.log('updating wallet');
+                        } else {
+                          console.log('Error updating wallet');
+                        }
+                      }
+      
+                    );
                   } else {
-                    console.log('Error updating wallet');
+                    console.log(err);
                   }
                 }
-
               );
+              
             }
 
             res.json({
