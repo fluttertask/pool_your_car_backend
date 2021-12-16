@@ -1001,7 +1001,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               if (data.driverId == req.body.userId){
                 Wallet.findOneAndUpdate(
                   {userId:  data.driverId},
-                  {$inc: {balance: -(req.body.amountSent*0.2)}},
+                  {$inc: {balance: -(data.ridefare*0.2)}},
                   (err, result) => {
                     if (!err) {
                       console.log('updating wallet');
@@ -1014,7 +1014,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                 datas.passengersID.forEach((index, passenger)=>{
                   Wallet.findOneAndUpdate(
                     {userId: passenger},
-                    {$inc: {balance: +(req.body.amountSent*0.2)}},
+                    {$inc: {balance: +(data.ridefare*0.2)}},
                     (err, result) => {
                       if (!err) {
                         console.log('updating wallet');
@@ -1029,7 +1029,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               if (data.driverId == req.body.userId){
                 Wallet.findOneAndUpdate(
                   {userId:  data.driverId},
-                  {$inc: {balance: -(req.body.amountSent*0.2)}},
+                  {$inc: {balance: -(data.ridefare*0.2)}},
                   (err, result) => {
                     if (!err) {
                       console.log('updating wallet');
@@ -1374,27 +1374,20 @@ router.post("/api/ride/startride", (req, res) => {
 });
 
 
-router.post("/api/ride/endbookedride/:id", (req, res) => {
-  console.log(req.params.id);
+router.post("/api/ride/endride", (req, res) => {
   console.log(req.body);
-  Ride.findByIdAndUpdate(
-    req.params.id, 
-    {
-      $pull: {requestedPassengers: req.body.userId},
-      $pull: {PassengersID: req.body.userId},
-      $pull: {readyPassengersID: req.body.userId},
-      $inc: { availableseats: +1}
-    },
-    (err, data) => {
+  Ride.findById(
+    req.body.rideId,
+    (err, ride) => {
     if (!err) {
-      console.log(data);
+      console.log(ride);
 
-      if (data != null) {
+      if (ride) {
 
         User.findOneAndUpdate(
           { _id: req.body.userId },
-          { $push: { pastofferedride: req.params.id } },
-          { $pull: { offeredride: req.params.id } },
+          { $push: { pastofferedride: req.body.rideId } },
+          { $pull: { offeredride: req.body.rideId } },
           { new: true },
           (err, doc) => {
             if (!err) {
@@ -1408,15 +1401,15 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
         data.passengersID.forEach((id)=>{
           User.findOneAndUpdate(
             { _id: id },
-            { $push: { pastbookedride: req.params.id } },
-            { $pull: { bookedride: req.params.id } },
+            { $push: { pastbookedride: req.body.rideId } },
+            { $pull: { bookedride: req.body.rideId } },
             { new: true },
             (err, doc) => {
               if (!err) {
                 console.log(doc);
                 Wallet.findOneAndUpdate(
                   {userId: id},
-                  {$inc: {balance: -(req.body.amountSent*0.8)}},
+                  {$inc: {balance: -(ride.ridefare*0.8)}},
                   (err, result) => {
                     if (!err) {
                       // console.log('updating wallet');
@@ -1434,7 +1427,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 
         Wallet.findOneAndUpdate(
           {userId: req.body.userId},
-          {$inc: {balance: +(req.body.amountSent*0.6 * data.passengersID.length)}},
+          {$inc: {balance: +(ride.ridefare*0.6 * data.passengersID.length)}},
           (err, result) => {
             if (!err) {
               console.log('updating wallet');
@@ -1446,7 +1439,7 @@ router.post("/api/ride/endbookedride/:id", (req, res) => {
 
         Admin.findOneAndUpdate(
           {},
-          {$inc: {totalAmount: +(req.body.amountSent*0.2)}},
+          {$inc: {totalAmount: +(ride.ridefare*0.2)}},
           () => {
             if (!err) {
               console.log('updating admin');
