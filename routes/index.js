@@ -962,14 +962,14 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
   console.log(req.body);
   Ride.findById(
     req.params.id,
-    (err, data) => {
+    (err, datas) => {
       if (err) return;
-      var passengers = data.passengersID;
+      datas.passengersID;
       Ride.findByIdAndUpdate(
         req.params.id, 
         {
           $pull: {requestedPassengers: req.body.userId},
-          $pull: {PassengersID: req.body.userId},
+          $pull: {passengersID: req.body.userId},
           $pull: {readyPassengersID: req.body.userId},
           $inc: { availableseats: +1}
         },
@@ -1012,7 +1012,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                   }
                 );
       
-                passengers.map((passenger)=>{
+                datas.passengersID.forEach((index, passenger)=>{
                   Wallet.findOneAndUpdate(
                     {userId: passenger},
                     {$inc: {balance: +(req.body.amountSent*0.2)}},
@@ -1024,7 +1024,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                       }
                     }
                   );
-                });
+                });passengers
               }
             }else {
               if (data.driverId == req.body.userId){
@@ -1040,7 +1040,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                   }
                 );
       
-                passengers.map((passenger)=>{
+                datas.passengersID.forEach((index, passenger)=>{
                   Wallet.findOneAndUpdate(
                     {userId: passenger},
                     {$inc: {balance: +(req.body.amountSent*0.2)}},
