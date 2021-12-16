@@ -796,7 +796,7 @@ router.post('/api/ride/acceptbookedride', (req, res)=>{
         Wallet.findOneAndUpdate(
           {userId: ride.driverId},
           {
-            $inc: {balance: -(ride.ridefare * 0.2)}
+            $inc: {balance: +(ride.ridefare * 0.2)}
           },
           (err, wallet) => {
         });
