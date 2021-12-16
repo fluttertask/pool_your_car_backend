@@ -1001,7 +1001,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               if (data.driverId == req.body.userId){
                 Wallet.findOneAndUpdate(
                   {userId:  data.driverId},
-                  {$inc: {balance: -(data.ridefare*0.2)}},
+                  {$inc: {balance: -(data.ridefare*0.2*datas.passengersID.length)}},
                   (err, result) => {
                     if (!err) {
                       console.log('updating wallet');
@@ -1029,7 +1029,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               if (data.driverId == req.body.userId){
                 Wallet.findOneAndUpdate(
                   {userId:  data.driverId},
-                  {$inc: {balance: -(data.ridefare*0.2)}},
+                  {$inc: {balance: -(data.ridefare*0.2*datas.passengersID.length)}},
                   (err, result) => {
                     if (!err) {
                       console.log('updating wallet');
@@ -1042,7 +1042,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                 datas.passengersID.forEach((index, passenger)=>{
                   Wallet.findOneAndUpdate(
                     {userId: passenger},
-                    {$inc: {balance: +(req.body.amountSent*0.2)}},
+                    {$inc: {balance: +(data.ridefare*0.2)}},
                     (err, result) => {
                       if (!err) {
                         console.log('updating wallet');
@@ -1055,7 +1055,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
               }else{
                 Wallet.findOneAndUpdate(
                   {userId:  data.driverId},
-                  {$inc: {balance: -(req.body.amountSent*0.2)}},
+                  {$inc: {balance: -(data.ridefare*0.2)}},
                   (err, result) => {
                     if (!err) {
                       console.log('updating wallet');
@@ -1067,7 +1067,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                 
                 Wallet.findOneAndUpdate(
                   {userId: req.body.userId},
-                  {$inc: {balance: +(req.body.amountSent*0.2)}},
+                  {$inc: {balance: +(data.ridefare*0.2)}},
                   (err, result) => {
                     if (!err) {
                       console.log('updating wallet');
