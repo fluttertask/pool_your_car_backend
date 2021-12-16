@@ -964,7 +964,6 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
     req.params.id,
     (err, datas) => {
       if (err) return;
-      datas.passengersID;
       Ride.findByIdAndUpdate(
         req.params.id, 
         {
