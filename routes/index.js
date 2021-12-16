@@ -1021,7 +1021,7 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
       console.log(datas)
       if (err) return;
       Ride.findByIdAndUpdate(
-        req.params.id, 
+        req.params.id,
         {
           $pull: {requestedPassengers: req.body.userId},
           $pull: {passengersID: req.body.userId},
@@ -1068,30 +1068,31 @@ router.post("/api/ride/cancelbookedride/:id", (req, res) => {
                 }
               );
 
-              User.findByIdAndUpdate(
-                req.body.userId,
-                { $pull: { bookedride: req.params.id } },
-                { new: true },
-                (err, doc) => {
-                  if (!err) {
-                    console.log(doc);
-                    Wallet.findOneAndUpdate(
-                      {userId: doc._id},
-                      {$inc: {balance: +(data.ridefare*0.2)}},
-                      (err, result) => {
-                        if (!err) {
-                          console.log('updating wallet');
-                        } else {
-                          console.log('Error updating wallet');
-                        }
-                      }
-      
-                    );
-                  } else {
-                    console.log(err);
+              data.passengersID.map((passenger) => {
+                Wallet.findOneAndUpdate(
+                  {userId: passenger},
+                  {$inc: {balance: +(data.ridefare*0.2)}},
+                  (err, result) => {
+                    if (!err) {
+                      console.log('updating wallet');
+                    } else {
+                      console.log('Error updating wallet');
+                    }
                   }
-                }
-              );
+                );
+              })
+              // Wallet.findOneAndUpdate(
+              //   {userId: req.body.userId},
+              //   {$inc: {balance: +(data.ridefare*0.2)}},
+              //   (err, result) => {
+              //     if (!err) {
+              //       console.log('updating wallet');
+              //     } else {
+              //       console.log('Error updating wallet');
+              //     }
+              //   }
+
+              // );
               
             }
 
