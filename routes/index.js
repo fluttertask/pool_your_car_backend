@@ -1327,7 +1327,7 @@ router.post("/api/ride/startride", (req, res) => {
             code: 200,
             state: true,
             message: "All user accepted proceed to ride",
-          });text
+          });
         }else{
           data.passengersID.forEach((id) => {
             if (!data.readyPassengersID.includes(id)){
