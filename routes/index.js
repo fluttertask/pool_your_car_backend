@@ -1436,7 +1436,7 @@ router.post("/api/ride/endride", (req, res) => {
           }
         );
 
-        data.passengersID.forEach((id)=>{
+        ride.passengersID.forEach((id)=>{
           User.findOneAndUpdate(
             { _id: id },
             { $push: { pastbookedride: req.body.rideId } ,
@@ -1502,7 +1502,7 @@ router.post("/api/ride/endride", (req, res) => {
         res.json({
           code: 200,
           message: "Ride has ended successfully",
-          deleteRide: data,
+          deleteRide: ride,
         });
 
         
