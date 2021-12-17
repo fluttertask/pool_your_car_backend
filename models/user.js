@@ -57,6 +57,17 @@ const User = mongoose.model("User", {
         type: mongoose.Schema.ObjectId,
         ref: "Ride",
       },
+      from: {
+        type: String
+      },
+
+      to: {
+        type: String
+      },
+
+      name: {
+        type: String
+      },
       message: {
         type: String,
       },
@@ -98,6 +109,15 @@ const User = mongoose.model("User", {
       type: mongoose.Schema.ObjectId,
       ref: "Conversation",
       required: true,
+    },
+  ],
+  userRate: {
+    default: 0,
+    type: Number,
+  },
+  allratings: [
+    {
+      type: Number,
     },
   ],
 });

@@ -3,34 +3,27 @@ const mongoose = require("mongoose");
 //Admin Schema
 
 const Admin = mongoose.model("Admin", {
-  firstname: {
-    type: String,
-    required: true,
-  },
-  lastname: {
-    type: String,
-    required: true,
-  },
-  phonenumber: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     match: /^\S+@\S+\.\S+$/,
     required: true,
     unique: true,
-
     lowercase: true,
   },
   password: {
     type: String,
     required: true,
   },
-  confirmpassword: {
+  createdOn: {
     type: String,
-    required: true,
   },
+  lastLogin: {
+    type: String,
+  },
+  totalAmount: {
+    type: Number,
+    default: 0,
+  }
 });
 
 module.exports = { Admin };

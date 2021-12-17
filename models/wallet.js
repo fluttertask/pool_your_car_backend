@@ -9,10 +9,21 @@ const Wallet = mongoose.model("Wallet", {
     default: 0,
   },
 
-  userID: {
+  uniqueId: {
+    type: Number,
+    require: true,
+  },
+
+  userId: {
     type: mongoose.Schema.ObjectId,
     ref: "user",
   },
+
+  balance: {
+    type: Number,
+    default: 0,
+  },
+
 });
 
 module.exports = { Wallet };
