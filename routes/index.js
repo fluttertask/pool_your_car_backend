@@ -1739,7 +1739,7 @@ router.post("/api/admin/login", (req, res) => {
         let response = {};
         response.accessToken = accessToken;
         response.user = admin;
-        res.status(200).json(response);
+        res.json(response);
         Admin.findOneAndUpdate(
           { email: req.body.email},
           {$set: {lastlogin: Date().split('+')[0]}},
